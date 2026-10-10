@@ -146,9 +146,10 @@ def score(actions: list, sides: list) -> tuple[float | None, float]:
 def summarize_features(df: pd.DataFrame) -> str:
     cols = [c for c in FEATURE_COLUMNS if c in df.columns]
     counts = df["side"].value_counts().to_dict()
+    dates = pd.to_datetime(df["date"])
     lines = [
         f"Trades: {len(df)} (buys: {counts.get('buy', 0)}, sells: {counts.get('sell', 0)})",
-        f"Date range: {df['date'].min()} to {df['date'].max()}" if len(df) else "Date range: n/a",
+        f"Date range: {dates.min().date()} to {dates.max().date()}" if len(df) else "Date range: n/a",
         "Most traded symbols: "
         + ", ".join(f"{s} ({n})" for s, n in df["symbol"].value_counts().head(10).items()),
         "",
