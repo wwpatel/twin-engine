@@ -1,4 +1,5 @@
 import time
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -20,14 +21,23 @@ def test_get_run():
 2025-01-02,AAPL,buy,10,150.0
 2025-01-03,AAPL,sell,10,155.0
 """
-    response = client.post("/runs", json={"trades_csv": csv_content})
-    run_id = response.json()["run_id"]
-    time.sleep(6)
-    response = client.get(f"/runs/{run_id}")
-    assert response.status_code == 200
-    data = response.json()
-    # Status could be "done" or "error" depending on whether Anthropic is configured
-    assert data["status"] in ["done", "error"]
+    with patch("engine.run_discovery") as mock_discovery:
+        mock_discovery.return_value = {
+            "run_id": "test-run-id",
+            "status": "done",
+            "round": 1,
+            "hypotheses": [],
+            "baseline": {"text": "baseline", "holdout_match": None},
+            "exceptions": [],
+            "summary": {"followed_pct": 0.0, "return_when_followed": None, "return_when_broken": None},
+        }
+        response = client.post("/runs", json={"trades_csv": csv_content})
+        run_id = response.json()["run_id"]
+        time.sleep(1)
+        response = client.get(f"/runs/{run_id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "done"
 
 
 def test_get_nonexistent_run():
