@@ -32,7 +32,7 @@ def test_get_run(monkeypatch):
             break
         time.sleep(0.1)
     assert data["status"] == "done"
-    assert data["run_id"] == "mock"
+    assert data["run_id"] == run_id  # the id the client polls with
 
 
 def test_get_nonexistent_run():
