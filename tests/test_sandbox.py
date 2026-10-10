@@ -4,6 +4,17 @@ import pytest
 from sandbox import SandboxError, run_rule
 
 
+@pytest.fixture(autouse=True)
+def reset_daytona_state():
+    """Reset Daytona global state before each test."""
+    import sandbox
+    sandbox._daytona_sandbox = None
+    sandbox._daytona_client = None
+    yield
+    sandbox._daytona_sandbox = None
+    sandbox._daytona_client = None
+
+
 def test_simple_rule():
     code = """
 def rule(row):
@@ -39,3 +50,18 @@ def rule(row):
     df = pd.DataFrame([{"price": 100}])
     with pytest.raises(SandboxError, match="timed out"):
         run_rule(code, df, timeout_s=1)
+
+
+def test_daytona_not_used_without_api_key(monkeypatch):
+    """Test that local subprocess is used when DAYTONA_API_KEY is not set."""
+    code = """
+def rule(row):
+    return "buy" if row.get("price", 0) > 100 else None
+"""
+    df = pd.DataFrame([{"price": 150}, {"price": 50}])
+
+    # Ensure no API key
+    monkeypatch.delenv("DAYTONA_API_KEY", raising=False)
+
+    result = run_rule(code, df)
+    assert result == ["buy", None]
