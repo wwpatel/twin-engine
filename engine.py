@@ -284,6 +284,8 @@ def _mean(values: list) -> float | None:
 
 
 def _exceptions_and_summary(trades: list[dict], kept: list[dict]) -> tuple[list[dict], dict]:
+    import news
+
     broke_rule = max(kept, key=lambda k: k["coverage"])["text"] if kept else None
     exceptions = []
     followed_returns, broken_returns = [], []
@@ -294,12 +296,17 @@ def _exceptions_and_summary(trades: list[dict], kept: list[dict]) -> tuple[list[
             followed_returns.append(outcome)
             continue
         broken_returns.append(outcome)
+
+        # Fill context from news cache (network never called at request time)
+        headlines = news.get_headlines(trade["symbol"], trade["date"])
+        context = [h["title"] for h in headlines] if headlines else ["No clear cause in the news"]
+
         exceptions.append({
             "date": trade["date"],
             "symbol": trade["symbol"],
             "side": trade["side"],
             "broke_rule": broke_rule,
-            "context": [],
+            "context": context,
             "outcome_pct": outcome,
         })
     summary = {
