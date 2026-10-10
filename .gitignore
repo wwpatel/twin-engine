@@ -2,3 +2,7 @@
 .venv/
 __pycache__/
 data/answer_key.json
+data/guru_dip_answer_key.json
+data/guru_breakout_answer_key.json
+data/guru_defensive_answer_key.json
+data/follower_sample_answer_key.json
