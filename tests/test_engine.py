@@ -43,6 +43,8 @@ def run(monkeypatch, trades, responses, closes=None):
     monkeypatch.setitem(sys.modules, "parser", parser)
     monkeypatch.setitem(sys.modules, "features", features)
     monkeypatch.setitem(sys.modules, "sandbox", sandbox)
+    # Mock news.get_headlines to return empty list (cache miss)
+    monkeypatch.setattr("news.get_headlines", lambda symbol, date: [])
     client = FakeAnthropic(responses)
     monkeypatch.setattr(engine, "_make_client", lambda: client)
     monkeypatch.setattr(engine, "fetch_close_after", FakePrices(closes))
@@ -136,7 +138,7 @@ def test_exception_selection(monkeypatch):
         ("2026-02-02", "DDD"),
     ]
     assert all(e["broke_rule"] == "Buys after 3+ down days" for e in exceptions)
-    assert all(e["context"] == [] for e in exceptions)
+    assert all(e["context"] == ["No clear cause in the news"] for e in exceptions)
     assert [e["outcome_pct"] for e in exceptions] == [10.0, -5.0, 10.0]
 
     assert result["summary"] == {

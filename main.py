@@ -1,12 +1,14 @@
 import json
 import threading
-import time
+import tempfile
 import uuid
 from typing import Dict, Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+import engine
 
 app = FastAPI()
 
@@ -30,24 +32,28 @@ class RunResponse(BaseModel):
     run_id: str
 
 
-def load_contract_example() -> Dict[str, Any]:
-    with open("contract.example.json") as f:
-        return json.load(f)
-
-
 def run_job(run_id: str, request: RunRequest):
-    contract = load_contract_example()
-    contract["run_id"] = run_id
-    contract["status"] = "running"
-    runs[run_id] = contract
+    # Determine CSV path
+    if request.dataset == "sample":
+        csv_path = "data/sample_trades.csv"
+    elif request.trades_csv:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+            f.write(request.trades_csv)
+            csv_path = f.name
+    else:
+        runs[run_id] = {"status": "error", "error": "Must provide dataset='sample' or trades_csv"}
+        return
 
-    for round_num in range(1, 6):
-        contract["round"] = round_num
-        runs[run_id] = contract.copy()
-        time.sleep(1)
+    runs[run_id] = {"status": "running", "run_id": run_id}
 
-    contract["status"] = "done"
-    runs[run_id] = contract
+    def on_progress(update: dict):
+        runs[run_id] = update
+
+    try:
+        result = engine.run_discovery(csv_path, on_progress)
+        runs[run_id] = result
+    except Exception as e:
+        runs[run_id] = {"status": "error", "error": str(e)}
 
 
 @app.post("/runs", response_model=RunResponse)
