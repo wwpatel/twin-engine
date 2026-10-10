@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import uuid
@@ -300,10 +301,29 @@ def _mean(values: list) -> float | None:
     return round(sum(values) / len(values), 2) if values else None
 
 
-def _exceptions_and_summary(trades: list[dict], kept: list[dict]) -> tuple[list[dict], dict]:
+def _load_news_cache() -> dict:
+    """The precomputed news cache; never touches the network."""
     import news
 
-    broke_rule = max(kept, key=lambda k: k["coverage"])["text"] if kept else None
+    try:
+        with open(news.CACHE_PATH) as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def _exceptions_and_summary(trades: list[dict], kept: list[dict]) -> tuple[list[dict], dict]:
+    if not kept:
+        # Without a kept rule nothing can be "broken": do not label every trade an exception.
+        return [], {
+            "followed_pct": 0.0,
+            "return_when_followed": None,
+            "return_when_broken": None,
+            "note": "No rule met the match and coverage thresholds, so there are no exceptions to report.",
+        }
+
+    news_cache = _load_news_cache()
+    broke_rule = max(kept, key=lambda k: k["coverage"])["text"]
     exceptions = []
     followed_returns, broken_returns = [], []
     for i, trade in enumerate(trades):
@@ -314,8 +334,8 @@ def _exceptions_and_summary(trades: list[dict], kept: list[dict]) -> tuple[list[
             continue
         broken_returns.append(outcome)
 
-        # Fill context from news cache (network never called at request time)
-        headlines = news.get_headlines(trade["symbol"], trade["date"])
+        # Fill context from the news cache only: a miss must never trigger a live request
+        headlines = news_cache.get(f"{trade['symbol']}|{trade['date']}")
         context = [h["title"] for h in headlines] if headlines else ["No clear cause in the news"]
 
         exceptions.append({
