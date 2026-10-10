@@ -1,7 +1,25 @@
 import json
+import random
 
+import numpy as np
 import pandas as pd
 import pytest
+
+from data import make_sample
+
+
+@pytest.fixture(scope="module")
+def answer_keys(tmp_path_factory):
+    out = tmp_path_factory.mktemp("answer_keys")
+    prices = make_sample.fetch_prices()
+    keys = {}
+    for style in ("original", "guru_breakout", "guru_defensive"):
+        random.seed(make_sample.SEED)
+        np.random.seed(make_sample.SEED)
+        _, key_path = make_sample.write_style(style, prices, output_dir=str(out))
+        with open(key_path) as f:
+            keys[style] = json.load(f)
+    return keys
 
 
 def load_trades(path: str) -> list[dict]:
@@ -45,9 +63,8 @@ def test_no_sell_without_position():
                 positions[symbol] = {"qty": trade["qty"]}
 
 
-def test_exactly_12_exceptions_in_key():
-    with open("data/answer_key.json") as f:
-        answer_key = json.load(f)
+def test_exactly_12_exceptions_in_key(answer_keys):
+    answer_key = answer_keys["original"]
 
     assert "exceptions" in answer_key
     assert len(answer_key["exceptions"]) == 12
@@ -59,9 +76,8 @@ def test_exactly_12_exceptions_in_key():
         assert abs(exc["move"]) > 5, f"Exception move {exc['move']} is not > 5%"
 
 
-def test_answer_key_has_habits_and_seed():
-    with open("data/answer_key.json") as f:
-        answer_key = json.load(f)
+def test_answer_key_has_habits_and_seed(answer_keys):
+    answer_key = answer_keys["original"]
 
     assert "seed" in answer_key
     assert answer_key["seed"] == 42
@@ -123,9 +139,8 @@ def test_guru_breakout_no_sell_without_position():
                 positions[symbol] = {"qty": trade["qty"]}
 
 
-def test_guru_breakout_exactly_10_exceptions_in_key():
-    with open("data/guru_breakout_answer_key.json") as f:
-        answer_key = json.load(f)
+def test_guru_breakout_exactly_10_exceptions_in_key(answer_keys):
+    answer_key = answer_keys["guru_breakout"]
 
     assert "exceptions" in answer_key
     assert len(answer_key["exceptions"]) == 10
@@ -163,9 +178,8 @@ def test_guru_defensive_no_sell_without_position():
                 positions[symbol] = {"qty": trade["qty"]}
 
 
-def test_guru_defensive_exactly_8_exceptions_in_key():
-    with open("data/guru_defensive_answer_key.json") as f:
-        answer_key = json.load(f)
+def test_guru_defensive_exactly_8_exceptions_in_key(answer_keys):
+    answer_key = answer_keys["guru_defensive"]
 
     assert "exceptions" in answer_key
     assert len(answer_key["exceptions"]) == 8

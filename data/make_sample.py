@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import random
 from datetime import datetime, timedelta
 
@@ -670,60 +671,66 @@ def generate_follower_sample(prices):
     return trades, []
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate sample trading data")
-    parser.add_argument("--style", type=str, default="original",
-                        choices=["original", "guru_dip", "guru_breakout", "guru_defensive", "follower_sample"],
-                        help="Trading style to generate")
-    args = parser.parse_args()
-
-    prices = fetch_prices()
-
-    if args.style == "original":
-        trades, exceptions = generate_trades(prices)
-        output_csv = "data/sample_trades.csv"
-        output_key = "data/answer_key.json"
-        habits = [
+STYLES = {
+    "original": {
+        "generator": generate_trades,
+        "csv": "sample_trades.csv",
+        "key": "answer_key.json",
+        "habits": [
             "Buy when a stock closed down 3 or more days in a row",
             "Sell the whole position once it is up 8% or more from entry",
             "Never buy the day after SPY fell more than 1%",
-        ]
-    elif args.style == "guru_dip":
-        trades, exceptions = generate_guru_dip(prices)
-        output_csv = "data/guru_dip.csv"
-        output_key = "data/guru_dip_answer_key.json"
-        habits = [
+        ],
+    },
+    "guru_dip": {
+        "generator": generate_guru_dip,
+        "csv": "guru_dip.csv",
+        "key": "guru_dip_answer_key.json",
+        "habits": [
             "Buy when a stock closed down 3 or more days in a row",
             "Sell the whole position once it is up 8% or more from entry",
             "Never buy the day after SPY fell more than 1%",
-        ]
-    elif args.style == "guru_breakout":
-        trades, exceptions = generate_guru_breakout(prices)
-        output_csv = "data/guru_breakout.csv"
-        output_key = "data/guru_breakout_answer_key.json"
-        habits = [
+        ],
+    },
+    "guru_breakout": {
+        "generator": generate_guru_breakout,
+        "csv": "guru_breakout.csv",
+        "key": "guru_breakout_answer_key.json",
+        "habits": [
             "Buy when a stock closes at a 20-day high",
             "Sell when position is down 5% from entry",
             "About 70% of trades follow these rules",
-        ]
-    elif args.style == "guru_defensive":
-        trades, exceptions = generate_guru_defensive(prices)
-        output_csv = "data/guru_defensive.csv"
-        output_key = "data/guru_defensive_answer_key.json"
-        habits = [
+        ],
+    },
+    "guru_defensive": {
+        "generator": generate_guru_defensive,
+        "csv": "guru_defensive.csv",
+        "key": "guru_defensive_answer_key.json",
+        "habits": [
             "Trim all positions when SPY falls more than 1.5%",
             "Favor XOM, JPM, COST for new positions",
             "About 75% of trades follow these rules",
-        ]
-    elif args.style == "follower_sample":
-        trades, exceptions = generate_follower_sample(prices)
-        output_csv = "data/follower_sample.csv"
-        output_key = "data/follower_sample_answer_key.json"
-        habits = [
+        ],
+    },
+    "follower_sample": {
+        "generator": generate_follower_sample,
+        "csv": "follower_sample.csv",
+        "key": "follower_sample_answer_key.json",
+        "habits": [
             "Buy after down days about 30% of the time",
             "Otherwise random trading",
             "About 70 total trades",
-        ]
+        ],
+    },
+}
+
+
+def write_style(style: str, prices, output_dir: str = "data") -> tuple[str, str]:
+    spec = STYLES[style]
+    trades, exceptions = spec["generator"](prices)
+    output_csv = os.path.join(output_dir, spec["csv"])
+    output_key = os.path.join(output_dir, spec["key"])
+    habits = spec["habits"]
 
     # Write CSV
     df = pd.DataFrame(trades)
@@ -739,6 +746,19 @@ def main():
     with open(output_key, "w") as f:
         json.dump(answer_key, f, indent=2)
     print(f"Wrote answer key to {output_key}")
+
+    return output_csv, output_key
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate sample trading data")
+    parser.add_argument("--style", type=str, default="original",
+                        choices=list(STYLES),
+                        help="Trading style to generate")
+    args = parser.parse_args()
+
+    prices = fetch_prices()
+    write_style(args.style, prices)
 
 
 if __name__ == "__main__":
