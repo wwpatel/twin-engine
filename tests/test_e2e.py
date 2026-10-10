@@ -1,11 +1,32 @@
 import json
+import sys
 import tempfile
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
 import pytest
 
-import engine
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import engine  # noqa: E402
+from tests.fakes import make_modules, make_trade  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def mock_parser_module(monkeypatch):
+    """Mock the parser module for e2e tests."""
+    trades = [
+        make_trade("2025-01-02", "AAPL", "buy", 150.0),
+        make_trade("2025-01-03", "AAPL", "sell", 155.0),
+        make_trade("2025-01-04", "MSFT", "buy", 300.0),
+        make_trade("2025-01-05", "MSFT", "sell", 310.0),
+    ]
+    parser, features, sandbox = make_modules(trades)
+    monkeypatch.setitem(sys.modules, "parser", parser)
+    monkeypatch.setitem(sys.modules, "features", features)
+    monkeypatch.setitem(sys.modules, "sandbox", sandbox)
 
 
 @pytest.fixture
@@ -63,61 +84,57 @@ def test_e2e_response_shape(sample_csv, mock_anthropic, mock_news_cache):
     with open("contract.example.json") as f:
         contract = json.load(f)
 
-    # Mock sandbox.run_rule (sandbox is imported inside run_discovery)
-    with patch("sandbox.run_rule") as mock_sandbox:
-        mock_sandbox.return_value = ["buy", None, "buy", None]
+    progress_updates = []
 
-        progress_updates = []
+    def on_progress(update):
+        progress_updates.append(update)
 
-        def on_progress(update):
-            progress_updates.append(update)
+    result = engine.run_discovery(sample_csv, on_progress)
 
-        result = engine.run_discovery(sample_csv, on_progress)
+    # Assert response shape matches contract
+    assert "run_id" in result
+    assert result["status"] in ["running", "done", "error"]
+    assert "round" in result
+    assert isinstance(result["round"], int)
+    assert "hypotheses" in result
+    assert isinstance(result["hypotheses"], list)
+    assert "baseline" in result
+    assert "exceptions" in result
+    assert isinstance(result["exceptions"], list)
+    assert "summary" in result
 
-        # Assert response shape matches contract
-        assert "run_id" in result
-        assert result["status"] in ["running", "done", "error"]
-        assert "round" in result
-        assert isinstance(result["round"], int)
-        assert "hypotheses" in result
-        assert isinstance(result["hypotheses"], list)
-        assert "baseline" in result
-        assert "exceptions" in result
-        assert isinstance(result["exceptions"], list)
-        assert "summary" in result
+    # Check hypotheses structure
+    if result["hypotheses"]:
+        for h in result["hypotheses"]:
+            assert "text" in h
+            assert "status" in h
+            assert h["status"] in ["kept", "rejected"]
+            assert "reason" in h
 
-        # Check hypotheses structure
-        if result["hypotheses"]:
-            for h in result["hypotheses"]:
-                assert "text" in h
-                assert "status" in h
-                assert h["status"] in ["kept", "rejected"]
-                assert "reason" in h
+    # Check baseline structure
+    assert "text" in result["baseline"]
+    assert "holdout_match" in result["baseline"]
 
-        # Check baseline structure
-        assert "text" in result["baseline"]
-        assert "holdout_match" in result["baseline"]
+    # Check exceptions structure
+    for exc in result["exceptions"]:
+        assert "date" in exc
+        assert "symbol" in exc
+        assert "side" in exc
+        assert "broke_rule" in exc
+        assert "context" in exc
+        assert isinstance(exc["context"], list)
+        assert "outcome_pct" in exc
 
-        # Check exceptions structure
-        for exc in result["exceptions"]:
-            assert "date" in exc
-            assert "symbol" in exc
-            assert "side" in exc
-            assert "broke_rule" in exc
-            assert "context" in exc
-            assert isinstance(exc["context"], list)
-            assert "outcome_pct" in exc
+    # Check summary structure
+    assert "followed_pct" in result["summary"]
+    assert "return_when_followed" in result["summary"]
+    assert "return_when_broken" in result["summary"]
 
-        # Check summary structure
-        assert "followed_pct" in result["summary"]
-        assert "return_when_followed" in result["summary"]
-        assert "return_when_broken" in result["summary"]
-
-        # Check progress updates
-        assert len(progress_updates) > 0
-        for update in progress_updates:
-            assert "round" in update
-            assert "hypotheses" in update
+    # Check progress updates
+    assert len(progress_updates) > 0
+    for update in progress_updates:
+        assert "round" in update
+        assert "hypotheses" in update
 
 
 def test_e2e_news_context_fallback(sample_csv, mock_anthropic):
@@ -126,17 +143,13 @@ def test_e2e_news_context_fallback(sample_csv, mock_anthropic):
         # Return empty headlines (cache miss)
         mock_news.return_value = []
 
-        # Mock sandbox.run_rule
-        with patch("sandbox.run_rule") as mock_sandbox:
-            mock_sandbox.return_value = ["buy", None, "buy", None]
+        progress_updates = []
 
-            progress_updates = []
+        def on_progress(update):
+            progress_updates.append(update)
 
-            def on_progress(update):
-                progress_updates.append(update)
+        result = engine.run_discovery(sample_csv, on_progress)
 
-            result = engine.run_discovery(sample_csv, on_progress)
-
-            # Check that exceptions have the fallback context
-            for exc in result["exceptions"]:
-                assert exc["context"] == ["No clear cause in the news"]
+        # Check that exceptions have the fallback context
+        for exc in result["exceptions"]:
+            assert exc["context"] == ["No clear cause in the news"]

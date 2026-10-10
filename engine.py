@@ -100,6 +100,8 @@ def run_discovery(trades_csv_path: str, on_progress: Callable[[dict], None]) -> 
 
     hypotheses: list[dict] = []
     kept: list[dict] = []
+    rule_codes: dict[str, str] = {}
+    rule_index = 0
     round_num = 0
     for round_num in range(1, MAX_ROUNDS + 1):
         prompt = build_prompt(feature_summary, hypotheses)
@@ -114,7 +116,15 @@ def run_discovery(trades_csv_path: str, on_progress: Callable[[dict], None]) -> 
         )
         hypotheses.append(hypothesis)
         if hypothesis["status"] == "kept":
-            kept.append({"text": hypothesis["text"], "coverage": actions["coverage"], "actions": actions["all"]})
+            rule_index += 1
+            rule_code_id = f"r{rule_index}"
+            rule_codes[rule_code_id] = hypothesis["code"]
+            kept.append({
+                "text": hypothesis["text"],
+                "coverage": actions["coverage"],
+                "actions": actions["all"],
+                "rule_code_id": rule_code_id,
+            })
         on_progress({"round": round_num, "hypotheses": [dict(h) for h in hypotheses]})
 
     baseline_actions = _run_rule_safely(sandbox, BASELINE_CODE, holdout_df)
@@ -122,6 +132,10 @@ def run_discovery(trades_csv_path: str, on_progress: Callable[[dict], None]) -> 
     baseline = {"text": BASELINE_TEXT, "holdout_match": baseline_match}
 
     exceptions, summary = _exceptions_and_summary(trades, kept)
+
+    # Remove code from hypotheses before returning (stored in rule_codes instead)
+    for h in hypotheses:
+        h.pop("code", None)
 
     return {
         "run_id": uuid.uuid4().hex,
@@ -131,6 +145,7 @@ def run_discovery(trades_csv_path: str, on_progress: Callable[[dict], None]) -> 
         "baseline": baseline,
         "exceptions": exceptions,
         "summary": summary,
+        "rule_codes": rule_codes,
     }
 
 
@@ -225,6 +240,7 @@ def _evaluate_response(text, sandbox, discovery_df, discovery_sides, holdout_df,
         "reason": "",
         "discovery_match": None,
         "holdout_match": None,
+        "code": code,
     }
     if not description or not code or "def rule" not in code:
         hypothesis["reason"] = "Could not parse a description and a def rule(row) from the model response"
