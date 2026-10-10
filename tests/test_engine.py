@@ -71,7 +71,7 @@ def test_no_holdout_row_reaches_prompt(monkeypatch):
 
     prompts = client.prompts()
     assert len(client.calls) == engine.MAX_ROUNDS
-    assert all(call["model"] == "claude-sonnet-4-6" for call in client.calls)
+    assert all(call["model"] == engine.MODEL for call in client.calls)
     for prompt in prompts:
         assert "HOLDX" not in prompt
         assert "777.777" not in prompt

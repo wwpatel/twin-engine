@@ -1,10 +1,11 @@
+import os
 import re
 import uuid
 from collections.abc import Callable
 
 import pandas as pd
 
-MODEL = "claude-sonnet-4-6"
+MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5-5")
 MAX_ROUNDS = 5
 DISCOVERY_FRACTION = 0.7
 MIN_MATCH = 0.65
