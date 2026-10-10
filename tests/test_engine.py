@@ -50,6 +50,9 @@ def run(monkeypatch, trades, responses, closes=None):
     monkeypatch.setattr(engine, "fetch_close_after", FakePrices(closes))
     progress = []
     result = engine.run_discovery("trades.csv", progress.append)
+    # Add insights to result (normally done in main.py)
+    import insights
+    result["insights"] = insights.build_insights(result)
     return result, client, progress, sandbox
 
 
@@ -170,7 +173,9 @@ def test_result_has_contract_shape(monkeypatch):
 
     result, *_ = run(monkeypatch, trades, [STREAK_RULE])
 
-    assert set(result) == {"run_id", "status", "round", "hypotheses", "baseline", "exceptions", "summary"}
+    assert set(result) == {"run_id", "status", "round", "hypotheses", "baseline", "exceptions", "summary", "rule_codes", "insights"}
     assert set(result["hypotheses"][0]) == {"text", "status", "reason", "discovery_match", "holdout_match"}
     assert set(result["baseline"]) == {"text", "holdout_match"}
     assert set(result["summary"]) == {"followed_pct", "return_when_followed", "return_when_broken"}
+    assert "rule_codes" in result
+    assert "insights" in result

@@ -4,11 +4,13 @@ import tempfile
 import uuid
 from typing import Dict, Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import engine
+import insights
+import activate
 
 app = FastAPI()
 
@@ -32,6 +34,12 @@ class RunResponse(BaseModel):
     run_id: str
 
 
+class ActivateRequest(BaseModel):
+    run_id: str
+    insight_id: str
+    dataset: str
+
+
 def run_job(run_id: str, request: RunRequest):
     # Determine CSV path
     if request.dataset == "sample":
@@ -51,6 +59,8 @@ def run_job(run_id: str, request: RunRequest):
 
     try:
         result = engine.run_discovery(csv_path, on_progress)
+        # Build insights from the result
+        result["insights"] = insights.build_insights(result)
         runs[run_id] = result
     except Exception as e:
         runs[run_id] = {"status": "error", "error": str(e)}
@@ -67,3 +77,14 @@ def create_run(request: RunRequest):
 @app.get("/runs/{run_id}")
 def get_run(run_id: str):
     return runs.get(run_id, {"error": "Run not found"})
+
+
+@app.post("/activate")
+def activate_insight(request: ActivateRequest):
+    try:
+        result = activate.activate(runs, request.run_id, request.insight_id, request.dataset)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
