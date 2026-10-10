@@ -12,6 +12,10 @@ import sandbox
 OUTCOME_HORIZON_DAYS = 5
 
 
+class NotFoundError(ValueError):
+    """A run, guru, or insight that does not exist."""
+
+
 def activate(run_store: dict, run_id: str, insight_id: str, dataset: str) -> dict:
     """Activate an insight on follower trade data.
 
@@ -35,10 +39,22 @@ def activate(run_store: dict, run_id: str, insight_id: str, dataset: str) -> dic
     # Get the run result
     run = run_store.get(run_id)
     if not run:
-        raise ValueError(f"Run {run_id} not found")
+        raise NotFoundError(f"Run {run_id} not found")
 
-    # Get the insights to find the rule code ID
-    insights = run.get("insights", [])
+    rule_code = _resolve_rule_code(run.get("insights", []), run.get("rule_codes", {}), insight_id, f"run {run_id}")
+    return _apply_rule(rule_code, dataset)
+
+
+def activate_guru(guru_public: dict, guru_rules: dict, guru_id: str, insight_id: str, dataset: str) -> dict:
+    """Activate an insight from a precomputed guru. Same return shape as activate()."""
+    if guru_id not in guru_public:
+        raise NotFoundError(f"Guru {guru_id} not found")
+
+    rule_code = _resolve_rule_code(guru_public[guru_id].get("insights", []), guru_rules.get(guru_id, {}), insight_id, f"guru {guru_id}")
+    return _apply_rule(rule_code, dataset)
+
+
+def _resolve_rule_code(insights: list, rule_codes: dict, insight_id: str, owner: str) -> str:
     insight = None
     for ins in insights:
         if ins.get("id") == insight_id:
@@ -46,17 +62,20 @@ def activate(run_store: dict, run_id: str, insight_id: str, dataset: str) -> dic
             break
 
     if not insight:
-        raise ValueError(f"Insight {insight_id} not found")
+        raise NotFoundError(f"Insight {insight_id} not found")
 
     rule_code_id = insight.get("rule_code_id")
     if not rule_code_id:
         raise ValueError(f"Insight {insight_id} has no rule code")
 
-    # Get the rule code from the run store
-    rule_code = run.get("rule_codes", {}).get(rule_code_id)
+    rule_code = rule_codes.get(rule_code_id)
     if not rule_code:
-        raise ValueError(f"Rule code {rule_code_id} not found in run {run_id}")
+        raise ValueError(f"Rule code {rule_code_id} not found in {owner}")
 
+    return rule_code
+
+
+def _apply_rule(rule_code: str, dataset: str) -> dict:
     # Load the follower data
     if dataset == "follower_sample":
         csv_path = "data/follower_sample.csv"
