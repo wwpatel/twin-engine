@@ -135,19 +135,31 @@ def test_exception_selection(monkeypatch):
     assert all(h["status"] == "rejected" for h in result["hypotheses"][2:])
 
     exceptions = result["exceptions"]
+    assert all(
+        set(e) == {"date", "symbol", "side", "exception_type", "broke_rule", "note", "context", "outcome_pct"}
+        for e in exceptions
+    )
     assert [(e["date"], e["symbol"]) for e in exceptions] == [
-        ("2026-01-06", "BBB"),
         ("2026-02-01", "CCC"),
         ("2026-02-02", "DDD"),
+        ("2026-01-06", "BBB"),
     ]
-    assert all(e["broke_rule"] == "Buys after 3+ down days" for e in exceptions)
+    assert [e["exception_type"] for e in exceptions] == ["broke_rule", "broke_rule", "unexplained"]
+    assert [e["broke_rule"] for e in exceptions] == [
+        "Buys after 3+ down days",
+        "Sells when price is more than 5% above its 20-day average",
+        None,
+    ]
+    assert [e["note"] for e in exceptions] == [None, None, "No kept rule covers this trade"]
     assert all(e["context"] == ["No clear cause in the news"] for e in exceptions)
-    assert [e["outcome_pct"] for e in exceptions] == [10.0, -5.0, 10.0]
+    assert [e["outcome_pct"] for e in exceptions] == [-5.0, 10.0, 10.0]
 
     assert result["summary"] == {
         "followed_pct": pytest.approx(0.7),
         "return_when_followed": 1.5,
         "return_when_broken": 5.0,
+        "n_broke_rule": 2,
+        "n_unexplained": 1,
     }
 
 
@@ -176,6 +188,8 @@ def test_result_has_contract_shape(monkeypatch):
     assert set(result) == {"run_id", "status", "round", "hypotheses", "baseline", "exceptions", "summary", "rule_codes", "insights"}
     assert set(result["hypotheses"][0]) == {"text", "status", "reason", "discovery_match", "holdout_match"}
     assert set(result["baseline"]) == {"text", "holdout_match"}
-    assert set(result["summary"]) == {"followed_pct", "return_when_followed", "return_when_broken"}
+    assert set(result["summary"]) == {
+        "followed_pct", "return_when_followed", "return_when_broken", "n_broke_rule", "n_unexplained"
+    }
     assert "rule_codes" in result
     assert "insights" in result
