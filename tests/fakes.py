@@ -39,7 +39,7 @@ def make_modules(trades):
 
     features = types.ModuleType("features")
 
-    def build_features(parsed):
+    def build_features(parsed, **kwargs):
         rows = []
         for t in parsed:
             src = by_key[(t["date"], t["symbol"], t["side"])]

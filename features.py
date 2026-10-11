@@ -124,8 +124,13 @@ def load_prices(
     start: pd.Timestamp,
     end: pd.Timestamp,
     cache_dir: Path = PRICE_CACHE_DIR,
+    allow_fetch: bool = True,
 ) -> pd.DataFrame:
-    """Daily prices covering [start, end), served from disk cache when possible."""
+    """Daily prices covering [start, end), served from disk cache when possible.
+
+    With allow_fetch=False the network is never used: whatever the cache holds is returned
+    (empty if the symbol is not cached).
+    """
     start, end = pd.Timestamp(start).normalize(), pd.Timestamp(end).normalize()
     cache_dir = Path(cache_dir)
     csv_path, meta_path = _price_paths(symbol, cache_dir)
@@ -135,9 +140,12 @@ def load_prices(
         meta = json.loads(meta_path.read_text())
         c_start, c_end = pd.Timestamp(meta["start"]), pd.Timestamp(meta["end"])
         cached = pd.read_csv(csv_path, index_col="date", parse_dates=["date"])
-        if c_start <= start and end <= c_end:
+        if c_start <= start and end <= c_end or not allow_fetch:
             return cached.loc[(cached.index >= start) & (cached.index < end)]
         start, end = min(start, c_start), max(end, c_end)
+
+    if not allow_fetch:
+        return _empty_prices()
 
     fresh = fetch_prices(symbol, start, end)
     if cached is not None:
@@ -151,14 +159,20 @@ def load_earnings_dates(
     symbol: str,
     needed_through: pd.Timestamp,
     cache_dir: Path = PRICE_CACHE_DIR,
+    allow_fetch: bool = True,
 ) -> list[pd.Timestamp] | None:
-    """Earnings dates from cache; refetch if the cache predates `needed_through`."""
+    """Earnings dates from cache; refetch if the cache predates `needed_through`.
+
+    With allow_fetch=False the cache is used as is and None is returned when it is missing.
+    """
     path = _earnings_path(symbol, Path(cache_dir))
     if path.exists():
         payload = json.loads(path.read_text())
-        if pd.Timestamp(payload["fetched_on"]) >= needed_through:
+        if not allow_fetch or pd.Timestamp(payload["fetched_on"]) >= needed_through:
             dates = payload["dates"]
             return None if dates is None else [pd.Timestamp(d) for d in dates]
+    if not allow_fetch:
+        return None
     dates = fetch_earnings_dates(symbol)
     save_earnings_cache(symbol, dates, pd.Timestamp.today().normalize(), cache_dir)
     return dates
@@ -208,6 +222,7 @@ def _days_to_next_earnings(
 def build_features(
     trades: list[dict],
     cache_dir: Path | str = PRICE_CACHE_DIR,
+    allow_fetch: bool = True,
 ) -> pd.DataFrame:
     """Build one feature row per trade.
 
@@ -226,10 +241,10 @@ def build_features(
 
     symbols = sorted({str(t["symbol"]).upper() for t in trades})
     closes = {
-        sym: load_prices(sym, start, end, cache_dir=cache_dir)["close"].astype(float)
+        sym: load_prices(sym, start, end, cache_dir=cache_dir, allow_fetch=allow_fetch)["close"].astype(float)
         for sym in sorted(set(symbols) | {BENCHMARK})
     }
-    earnings = {sym: load_earnings_dates(sym, end, cache_dir=cache_dir) for sym in symbols}
+    earnings = {sym: load_earnings_dates(sym, end, cache_dir=cache_dir, allow_fetch=allow_fetch) for sym in symbols}
 
     rows = []
     for trade, trade_date in zip(trades, dates):
