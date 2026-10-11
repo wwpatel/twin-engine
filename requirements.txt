@@ -1,10 +1,14 @@
-fastapi
-uvicorn
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
 pandas
 numpy
 yfinance
 anthropic
 requests
-pytest
+pytest==8.3.4
 python-dotenv
 daytona
+python-multipart==0.0.20
+pydantic==2.10.4
+httpx==0.28.1
+PyJWT[crypto]==2.10.1

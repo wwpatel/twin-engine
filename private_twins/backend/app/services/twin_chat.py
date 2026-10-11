@@ -102,10 +102,32 @@ Approved evidence:
 """
 
 
+def _request_anthropic_answer(twin: dict, evidence: list[dict], message: str, viewer_context: dict | None) -> str:
+    """Same system prompt, input and output shape as the OpenAI path."""
+    import anthropic
+
+    try:
+        response = anthropic.Anthropic(timeout=12.0).messages.create(
+            model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5-5"),
+            max_tokens=180,
+            temperature=0.45,
+            system=_system_prompt(twin, evidence, viewer_context),
+            messages=[{"role": "user", "content": message}],
+        )
+        content = "".join(block.text for block in response.content if getattr(block, "type", "") == "text").strip()
+    except Exception as exc:
+        raise RuntimeError(f"Anthropic provider request failed: {type(exc).__name__}") from exc
+    if not content:
+        raise RuntimeError("Anthropic provider returned an empty answer.")
+    return content
+
+
 def request_llm_answer(twin: dict, evidence: list[dict], message: str, viewer_context: dict | None = None) -> str:
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not configured.")
+        if os.getenv("ANTHROPIC_API_KEY"):
+            return _request_anthropic_answer(twin, evidence, message, viewer_context)
+        raise RuntimeError("OPENAI_API_KEY is not configured (ANTHROPIC_API_KEY is also not set). Twin chat is unavailable.")
     model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
     payload = {
         "model": model,
