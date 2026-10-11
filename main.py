@@ -40,40 +40,64 @@ class ActivateRequest(BaseModel):
     dataset: str
 
 
+RUN_TIMEOUT_SECONDS = 150
+
+
+class RunTimedOut(Exception):
+    pass
+
+
+def _error_record(run_id: str, message: str) -> dict:
+    # Keep whatever progress was made (hypotheses so far) alongside the error
+    return {**runs.get(run_id, {}), "status": "error", "run_id": run_id, "message": message, "error": message}
+
+
 def run_job(run_id: str, request: RunRequest):
     """Run discovery in the background. The stored record always has status running, done or error."""
     runs[run_id] = {"status": "running", "run_id": run_id}
+    timed_out = threading.Event()
+    outcome: dict = {}
 
-    try:
-        # Determine CSV path
-        if request.dataset == "sample":
-            csv_path = "data/sample_trades.csv"
-        elif request.trades_csv:
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
-                f.write(request.trades_csv)
-                csv_path = f.name
-        else:
-            raise ValueError("Must provide dataset='sample' or trades_csv")
+    def work():
+        try:
+            # Determine CSV path
+            if request.dataset == "sample":
+                csv_path = "data/sample_trades.csv"
+            elif request.trades_csv:
+                with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
+                    f.write(request.trades_csv)
+                    csv_path = f.name
+            else:
+                raise ValueError("Must provide dataset='sample' or trades_csv")
 
-        def on_progress(update: dict):
-            # Merge into the record so run_id and status survive progress updates
-            runs[run_id] = {**runs[run_id], **update, "status": "running", "run_id": run_id}
+            def on_progress(update: dict):
+                if timed_out.is_set():
+                    raise RunTimedOut()  # stops an abandoned run at its next round
+                # Merge into the record so run_id and status survive progress updates
+                runs[run_id] = {**runs[run_id], **update, "status": "running", "run_id": run_id}
 
-        result = engine.run_discovery(csv_path, on_progress)
-        # Build insights from the result
-        result["insights"] = insights.build_insights(result)
+            result = engine.run_discovery(csv_path, on_progress)
+            # Build insights from the result
+            result["insights"] = insights.build_insights(result)
+            outcome["result"] = result
+        except BaseException as e:
+            outcome["error"] = e
+
+    worker = threading.Thread(target=work, daemon=True)
+    worker.start()
+    worker.join(RUN_TIMEOUT_SECONDS)
+
+    if worker.is_alive():
+        timed_out.set()
+        runs[run_id] = _error_record(run_id, f"Run timed out after {RUN_TIMEOUT_SECONDS} seconds")
+    elif "error" in outcome:
+        e = outcome["error"]
+        runs[run_id] = _error_record(run_id, f"{type(e).__name__}: {e}")
+    else:
+        result = outcome["result"]
         result["run_id"] = run_id  # the id the client polls with, not the engine's internal one
         result["status"] = "done"
         runs[run_id] = result
-    except Exception as e:
-        message = f"{type(e).__name__}: {e}"
-        runs[run_id] = {
-            **runs.get(run_id, {}),
-            "status": "error",
-            "run_id": run_id,
-            "message": message,
-            "error": message,
-        }
 
 
 @app.post("/runs", response_model=RunResponse)
