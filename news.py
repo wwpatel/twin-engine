@@ -21,37 +21,46 @@ def _log(message: str) -> None:
     print(f"news: {message}", file=sys.stderr)
 
 
-def get_headlines(symbol: str, date: str) -> list[dict]:
-    cache_key = f"{symbol}|{date}"
+class NewsUnavailable(Exception):
+    """Live lookup could not run: missing credentials or a failed Bright Data request."""
 
+
+def _read_cache() -> dict:
     try:
         with open(CACHE_PATH) as f:
-            cache = json.load(f)
+            return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
-        cache = {}
+        return {}
 
-    if cache_key in cache:
+
+def get_headlines(symbol: str, date: str, use_cache: bool = True) -> list[dict]:
+    try:
+        return fetch_live_headlines(symbol, date, use_cache=use_cache)
+    except Exception as e:
+        _log(f"get_headlines({symbol!r}, {date!r}) failed: {e!r}")
+        return []
+
+
+def fetch_live_headlines(symbol: str, date: str, use_cache: bool = True) -> list[dict]:
+    """Return headlines; raises NewsUnavailable if credentials are missing, else propagates fetch errors."""
+    cache_key = f"{symbol}|{date}"
+    cache = _read_cache()
+    if use_cache and cache_key in cache:
         return cache[cache_key]
 
     api_key = os.environ.get("BRIGHTDATA_API_KEY")
     zone = os.environ.get("BRIGHTDATA_ZONE")
-
     if not api_key or not zone:
-        return []
+        raise NewsUnavailable("BRIGHTDATA_API_KEY or BRIGHTDATA_ZONE not set")
 
-    try:
-        headlines = fetch_headlines(symbol, date, api_key, zone)
+    headlines = fetch_headlines(symbol, date, api_key, zone)
 
-        cache[cache_key] = headlines
+    cache[cache_key] = headlines
+    os.makedirs(os.path.dirname(CACHE_PATH) or ".", exist_ok=True)
+    with open(CACHE_PATH, "w") as f:
+        json.dump(cache, f)
 
-        os.makedirs(os.path.dirname(CACHE_PATH) or ".", exist_ok=True)
-        with open(CACHE_PATH, "w") as f:
-            json.dump(cache, f)
-
-        return headlines
-    except Exception as e:
-        _log(f"get_headlines({symbol!r}, {date!r}) failed: {e!r}")
-        return []
+    return headlines
 
 
 def fetch_headlines(symbol: str, date: str, api_key: str, zone: str) -> list[dict]:
