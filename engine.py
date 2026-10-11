@@ -12,6 +12,8 @@ DISCOVERY_FRACTION = 0.7
 MIN_MATCH = 0.65
 MIN_COVERAGE = 0.10
 OUTCOME_HORIZON_DAYS = 5
+ANTHROPIC_TIMEOUT_SECONDS = 30
+PRICE_DIR = "data/prices"
 
 FEATURE_COLUMNS = [
     "ret_1d",
@@ -48,7 +50,10 @@ def _make_client():
 
 
 def fetch_close_after(symbol: str, date: str, days: int = OUTCOME_HORIZON_DAYS) -> float | None:
-    """Close `days` trading days after `date` (the trade date is day 0), or None if unavailable."""
+    """Close `days` trading days after `date` (the trade date is day 0), or None if not cached.
+
+    Reads only data/prices/<SYMBOL>.close.csv (see data/build_price_cache.py); never the network.
+    """
     try:
         closes = _close_history(symbol)
     except Exception:
@@ -66,14 +71,11 @@ _CLOSE_CACHE: dict = {}
 
 def _close_history(symbol: str) -> pd.Series | None:
     if symbol not in _CLOSE_CACHE:
-        import yfinance as yf
-
-        hist = yf.Ticker(symbol).history(period="max", auto_adjust=False)
-        closes = hist["Close"] if not hist.empty else pd.Series(dtype=float)
-        if getattr(closes.index, "tz", None) is not None:
-            closes.index = closes.index.tz_localize(None)
-        closes.index = closes.index.normalize()
-        _CLOSE_CACHE[symbol] = closes
+        path = os.path.join(PRICE_DIR, f"{symbol}.close.csv")
+        if not os.path.exists(path):
+            return None
+        closes = pd.read_csv(path, index_col="date", parse_dates=["date"])["close"]
+        _CLOSE_CACHE[symbol] = closes.sort_index()
     return _CLOSE_CACHE[symbol]
 
 
@@ -86,7 +88,7 @@ def run_discovery(trades_csv_path: str, on_progress: Callable[[dict], None]) -> 
     order = sorted(range(len(trades)), key=lambda i: pd.Timestamp(trades[i]["date"]))
     trades = [trades[i] for i in order]
 
-    df = features.build_features(trades).reset_index(drop=True)
+    df = features.build_features(trades, allow_fetch=False).reset_index(drop=True)
     if len(df) != len(trades):
         raise ValueError(f"build_features returned {len(df)} rows for {len(trades)} trades")
     sides = [t["side"] for t in trades]
@@ -110,6 +112,7 @@ def run_discovery(trades_csv_path: str, on_progress: Callable[[dict], None]) -> 
         response = client.messages.create(
             model=MODEL,
             max_tokens=1024,
+            timeout=ANTHROPIC_TIMEOUT_SECONDS,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": prompt}],
         )

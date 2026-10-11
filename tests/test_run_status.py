@@ -129,3 +129,48 @@ def test_no_kept_rule_reports_no_exceptions(start_run):
     assert all(h["status"] == "rejected" for h in record["hypotheses"])
     assert record["exceptions"] == []
     assert "No rule" in record["summary"]["note"]
+
+
+def test_whole_run_timeout_sets_error(monkeypatch):
+    import threading
+    import time
+
+    monkeypatch.setattr(main, "RUN_TIMEOUT_SECONDS", 0.2)
+    proceed = threading.Event()
+    late_update = []
+
+    def slow_run_discovery(csv_path, on_progress):
+        proceed.wait(5)
+        try:
+            on_progress({"round": 1, "hypotheses": []})
+        except main.RunTimedOut:
+            late_update.append("stopped")
+            raise
+        return {"status": "done"}
+
+    monkeypatch.setattr(main.engine, "run_discovery", slow_run_discovery)
+    main.runs.clear()
+    start = time.time()
+    main.run_job("run-1", main.RunRequest(trades_csv="x"))
+
+    assert time.time() - start < 3
+    record = main.runs["run-1"]
+    assert record["status"] == "error"
+    assert "timed out" in record["message"]
+    assert record["run_id"] == "run-1"
+
+    proceed.set()  # the abandoned run must not overwrite the error record
+    for _ in range(50):
+        if late_update:
+            break
+        time.sleep(0.05)
+    assert late_update == ["stopped"]
+    assert main.runs["run-1"]["status"] == "error"
+
+
+def test_anthropic_calls_have_a_30_second_timeout(start_run):
+    client = FakeAnthropic([STREAK_RULE])
+    start_run(client)
+
+    assert len(client.calls) == engine.MAX_ROUNDS
+    assert all(call["timeout"] == 30 for call in client.calls)
