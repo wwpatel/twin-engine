@@ -315,6 +315,25 @@ def _load_news_cache() -> dict:
         return {}
 
 
+NO_NEWS_CONTEXT = "No clear cause in the news"
+COMPANY_ALIASES = {
+    "AAPL": ["Apple"], "MSFT": ["Microsoft"], "NVDA": ["Nvidia"], "AMZN": ["Amazon"],
+    "GOOGL": ["Google", "Alphabet"], "META": ["Meta", "Facebook"], "TSLA": ["Tesla"],
+    "JPM": ["JPMorgan", "Chase"], "XOM": ["Exxon"], "COST": ["Costco"],
+}
+
+
+def _relevant_context(news_cache: dict, symbol: str, date: str) -> list[str]:
+    """Titles from the cache that name the ticker or a known company alias; cache only, never the network."""
+    needles = [symbol.lower()] + [a.lower() for a in COMPANY_ALIASES.get(symbol.upper(), [])]
+    titles = [
+        h["title"]
+        for h in news_cache.get(f"{symbol}|{date}") or []
+        if any(n in h["title"].lower() for n in needles)
+    ]
+    return titles or [NO_NEWS_CONTEXT]
+
+
 def _exceptions_and_summary(trades: list[dict], kept: list[dict]) -> tuple[list[dict], dict]:
     if not kept:
         # Without a kept rule nothing can be "broken": do not label every trade an exception.
@@ -322,36 +341,45 @@ def _exceptions_and_summary(trades: list[dict], kept: list[dict]) -> tuple[list[
             "followed_pct": 0.0,
             "return_when_followed": None,
             "return_when_broken": None,
+            "n_broke_rule": 0,
+            "n_unexplained": 0,
             "note": "No rule met the match and coverage thresholds, so there are no exceptions to report.",
         }
 
     news_cache = _load_news_cache()
-    broke_rule = max(kept, key=lambda k: k["coverage"])["text"]
     exceptions = []
     followed_returns, broken_returns = [], []
     for i, trade in enumerate(trades):
-        explained = any(k["actions"][i] == trade["side"] for k in kept)
         outcome = _outcome_pct(trade)
-        if explained:
+        if any(k["actions"][i] == trade["side"] for k in kept):
             followed_returns.append(outcome)
             continue
         broken_returns.append(outcome)
-
-        # Fill context from the news cache only: a miss must never trigger a live request
-        headlines = news_cache.get(f"{trade['symbol']}|{trade['date']}")
-        context = [h["title"] for h in headlines] if headlines else ["No clear cause in the news"]
-
+        contradicting = [k for k in kept if k["actions"][i] is not None and k["actions"][i] != trade["side"]]
+        if contradicting:
+            exception_type, broke_rule, note = (
+                "broke_rule", max(contradicting, key=lambda k: k["coverage"])["text"], None
+            )
+        else:
+            exception_type, broke_rule, note = "unexplained", None, "No kept rule covers this trade"
         exceptions.append({
             "date": trade["date"],
             "symbol": trade["symbol"],
             "side": trade["side"],
+            "exception_type": exception_type,
             "broke_rule": broke_rule,
-            "context": context,
+            "note": note,
+            # Fill context from the news cache only: a miss must never trigger a live request
+            "context": _relevant_context(news_cache, trade["symbol"], trade["date"]),
             "outcome_pct": outcome,
         })
+    exceptions.sort(key=lambda e: (e["exception_type"] != "broke_rule", pd.Timestamp(e["date"])))
+    n_broke = sum(e["exception_type"] == "broke_rule" for e in exceptions)
     summary = {
         "followed_pct": (len(trades) - len(exceptions)) / len(trades) if trades else 0.0,
         "return_when_followed": _mean(followed_returns),
         "return_when_broken": _mean(broken_returns),
+        "n_broke_rule": n_broke,
+        "n_unexplained": len(exceptions) - n_broke,
     }
     return exceptions, summary

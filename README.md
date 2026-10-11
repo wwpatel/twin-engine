@@ -57,7 +57,7 @@ The service:
 3. Splits data into discovery (70%) and holdout (30%) sets
 4. Uses Claude to propose and test trading rules iteratively
 5. Scores rules on both discovery and holdout data
-6. Fills exception context from cached news headlines
+6. Labels exceptions — trades no kept rule explains. Each is labeled `exception_type` "broke_rule" (a kept rule fires with the opposite side; `broke_rule` is the highest-coverage such rule's text) or "unexplained" (no kept rule fires; `broke_rule` is null and `note` is "No kept rule covers this trade"). Exceptions are listed broke_rule first, then unexplained, each group ascending by date. The summary carries `n_broke_rule` and `n_unexplained` counts.
 7. Returns the discovered rules, exceptions, and performance summary
 
 ## Run tests
@@ -68,7 +68,7 @@ pytest
 
 ## News Caching
 
-News headlines are fetched using Bright Data SERP API and cached in `data/news_cache.json`. The cache is read at request time to fill exception context without network calls. Run `python precompute_news.py` to pre-populate the cache for a dataset.
+News headlines are fetched using Bright Data SERP API and cached in `data/news_cache.json`. The cache is read at request time to fill exception context without network calls. Exception context keeps only cached headlines whose title mentions the ticker or a known company alias — AAPL→Apple, MSFT→Microsoft, NVDA→Nvidia, AMZN→Amazon, GOOGL→Google/Alphabet, META→Meta/Facebook, TSLA→Tesla, JPM→JPMorgan/Chase, XOM→Exxon, COST→Costco — and otherwise falls back to "No clear cause in the news". The cache is read-only during runs. Run `python precompute_news.py` to pre-populate the cache for a dataset.
 
 ## Precomputed gurus
 
