@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime, timedelta
 
 import requests
@@ -11,6 +12,8 @@ CACHE_PATH = "data/news_cache.json"
 API_URL = "https://api.brightdata.com/request"
 WINDOW_DAYS = 7
 MAX_HEADLINES = 3
+RETRY_BACKOFF_SECONDS = (1.0, 2.0)
+RETRY_BUDGET_SECONDS = 25.0
 
 
 class RetryableError(Exception):
@@ -33,6 +36,10 @@ def _read_cache() -> dict:
         return {}
 
 
+def cached_headlines(symbol: str, date: str) -> list[dict] | None:
+    return _read_cache().get(f"{symbol}|{date}")
+
+
 def get_headlines(symbol: str, date: str, use_cache: bool = True) -> list[dict]:
     try:
         return fetch_live_headlines(symbol, date, use_cache=use_cache)
@@ -53,7 +60,7 @@ def fetch_live_headlines(symbol: str, date: str, use_cache: bool = True) -> list
     if not api_key or not zone:
         raise NewsUnavailable("BRIGHTDATA_API_KEY or BRIGHTDATA_ZONE not set")
 
-    headlines = fetch_headlines(symbol, date, api_key, zone)
+    headlines = _fetch_with_retry(symbol, date, api_key, zone)
 
     cache[cache_key] = headlines
     os.makedirs(os.path.dirname(CACHE_PATH) or ".", exist_ok=True)
@@ -84,12 +91,29 @@ def fetch_headlines(symbol: str, date: str, api_key: str, zone: str) -> list[dic
         raise RetryableError(f"HTTP {response.status_code}")
     if response.status_code != 200:
         raise ValueError(f"HTTP {response.status_code}")
+    if not response.content:
+        raise RetryableError("empty body (0 bytes)")
     try:
         data = response.json()
     except ValueError as e:
         raise RetryableError(f"non-JSON body ({len(response.content)} bytes)") from e
 
     return parse_headlines(data, trade_date, start_date, end_date)
+
+
+def _fetch_with_retry(symbol: str, date: str, api_key: str, zone: str) -> list[dict]:
+    start = time.monotonic()
+    attempt = 0
+    while True:
+        try:
+            return fetch_headlines(symbol, date, api_key, zone)
+        except RetryableError as e:
+            delay = RETRY_BACKOFF_SECONDS[attempt] if attempt < len(RETRY_BACKOFF_SECONDS) else None
+            if delay is None or time.monotonic() - start + delay > RETRY_BUDGET_SECONDS:
+                raise
+            _log(f"attempt {attempt + 1} failed ({e}); retrying in {delay:g}s")
+            time.sleep(delay)
+            attempt += 1
 
 
 def parse_headlines(data: dict, trade_date, start_date, end_date) -> list[dict]:

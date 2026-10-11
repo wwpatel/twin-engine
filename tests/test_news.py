@@ -1,10 +1,17 @@
 import json
 import os
 import tempfile
+from unittest.mock import Mock
 
 import pytest
 
+import news
 from news import get_headlines
+
+
+@pytest.fixture(autouse=True)
+def _no_sleep(monkeypatch):
+    monkeypatch.setattr(news.time, "sleep", lambda s: None)
 
 
 @pytest.fixture
@@ -80,8 +87,6 @@ class FakeResponse:
 
 @pytest.fixture
 def empty_cache(monkeypatch, tmp_path):
-    import news
-
     monkeypatch.setattr(news, "CACHE_PATH", str(tmp_path / "cache.json"))
     monkeypatch.setenv("BRIGHTDATA_API_KEY", "test-key")
     monkeypatch.setenv("BRIGHTDATA_ZONE", "test-zone")
@@ -181,3 +186,85 @@ def test_fetch_live_headlines_raises_news_unavailable_without_credentials(empty_
     with pytest.raises(news.NewsUnavailable):
         news.fetch_live_headlines("NVDA", "2026-03-14")
     assert news.get_headlines("NVDA", "2026-03-14") == []
+
+
+def test_fetch_live_retries_empty_body_then_succeeds(empty_cache, monkeypatch):
+    news = empty_cache
+    responses = [FakeResponse(200, None, text=""), FakeResponse(200, FIXTURE_RESPONSE)]
+    calls = [0]
+
+    def post(*a, **k):
+        calls[0] += 1
+        return responses.pop(0)
+
+    monkeypatch.setattr(news.requests, "post", post)
+    slept = []
+    monkeypatch.setattr(news.time, "sleep", slept.append)
+    out = news.fetch_live_headlines("NVDA", "2026-03-14", use_cache=False)
+    assert len(out) == 3
+    assert calls[0] == 2
+    assert slept == [1.0]
+    with open(news.CACHE_PATH) as f:
+        assert json.load(f)["NVDA|2026-03-14"] == out
+
+
+def test_fetch_live_gives_up_after_three_attempts(empty_cache, monkeypatch):
+    news = empty_cache
+    calls = [0]
+
+    def post(*a, **k):
+        calls[0] += 1
+        return FakeResponse(429)
+
+    monkeypatch.setattr(news.requests, "post", post)
+    slept = []
+    monkeypatch.setattr(news.time, "sleep", slept.append)
+    with pytest.raises(news.RetryableError):
+        news.fetch_live_headlines("NVDA", "2026-03-14", use_cache=False)
+    assert calls[0] == 3
+    assert slept == [1.0, 2.0]
+    assert not os.path.exists(news.CACHE_PATH)
+
+
+def test_fetch_live_respects_total_budget(empty_cache, monkeypatch):
+    news = empty_cache
+    calls = [0]
+
+    def post(*a, **k):
+        calls[0] += 1
+        return FakeResponse(200, None, text="")
+
+    monkeypatch.setattr(news.requests, "post", post)
+    monkeypatch.setattr(news.time, "monotonic", Mock(side_effect=[0.0, 24.5]))
+    slept = []
+    monkeypatch.setattr(news.time, "sleep", slept.append)
+    with pytest.raises(news.RetryableError):
+        news.fetch_live_headlines("NVDA", "2026-03-14", use_cache=False)
+    assert calls[0] == 1
+    assert slept == []
+
+
+def test_fetch_live_does_not_retry_non_retryable(empty_cache, monkeypatch):
+    news = empty_cache
+    calls = [0]
+
+    def post(*a, **k):
+        calls[0] += 1
+        return FakeResponse(400)
+
+    monkeypatch.setattr(news.requests, "post", post)
+    with pytest.raises(ValueError):
+        news.fetch_live_headlines("NVDA", "2026-03-14", use_cache=False)
+    assert calls[0] == 1
+
+
+def test_retry_log_never_contains_api_key(empty_cache, monkeypatch, capsys):
+    news = empty_cache
+    responses = [FakeResponse(200, None, text=""), FakeResponse(200, FIXTURE_RESPONSE)]
+
+    def post(*a, **k):
+        return responses.pop(0)
+
+    monkeypatch.setattr(news.requests, "post", post)
+    news.fetch_live_headlines("NVDA", "2026-03-14", use_cache=False)
+    assert "test-key" not in capsys.readouterr().err

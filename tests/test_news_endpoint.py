@@ -10,6 +10,19 @@ from main import app
 client = TestClient(app)
 
 ITEMS = [{"title": "a", "source": "b", "published": "c"}, {"title": "d", "source": "e", "published": "f"}]
+LIVE_ITEMS = [{"title": "t", "source": "s", "published": "Mar 13, 2026"}]
+CACHED_ITEMS = [{"title": "cached", "source": "x", "published": "Mar 12, 2026"}]
+
+
+def _empty_body():
+    return Mock(status_code=200, content=b"", json=Mock(side_effect=ValueError("no json")))
+
+
+def _ok():
+    return Mock(status_code=200, json=lambda: {
+        "general": {"search_type": "news"},
+        "news": [{"title": "t", "source": "s", "date": "Mar 13, 2026"}],
+    })
 
 
 @pytest.fixture(autouse=True)
@@ -17,6 +30,11 @@ def _clear_news_calls():
     main._news_calls.clear()
     yield
     main._news_calls.clear()
+
+
+@pytest.fixture(autouse=True)
+def _no_sleep(monkeypatch):
+    monkeypatch.setattr(news.time, "sleep", lambda s: None)
 
 
 def test_news_live_call_shape(monkeypatch):
@@ -75,13 +93,15 @@ def test_news_failure_returns_error_source(monkeypatch, tmp_path):
     monkeypatch.setenv("BRIGHTDATA_API_KEY", "test-key")
     monkeypatch.setenv("BRIGHTDATA_ZONE", "z")
     monkeypatch.setattr(news, "CACHE_PATH", str(tmp_path / "cache.json"))
-    monkeypatch.setattr(news.requests, "post", Mock(return_value=Mock(status_code=429)))
+    post = Mock(return_value=Mock(status_code=429))
+    monkeypatch.setattr(news.requests, "post", post)
     r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14"})
     assert r.status_code == 200
     assert r.json()["items"] == []
     assert r.json()["source"] == "error"
     assert "429" in r.json()["message"]
     assert "test-key" not in r.text
+    assert post.call_count == 3
 
     monkeypatch.delenv("BRIGHTDATA_API_KEY", raising=False)
     r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14"})
@@ -143,3 +163,92 @@ def test_news_rate_limit(monkeypatch):
     assert client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14"}).status_code == 429
     t[0] += 61
     assert client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14"}).status_code == 200
+
+
+def test_news_empty_body_then_success_returns_live(monkeypatch, tmp_path):
+    monkeypatch.setenv("BRIGHTDATA_API_KEY", "test-key")
+    monkeypatch.setenv("BRIGHTDATA_ZONE", "z")
+    monkeypatch.setattr(news, "CACHE_PATH", str(tmp_path / "cache.json"))
+    post = Mock(side_effect=[_empty_body(), _ok()])
+    monkeypatch.setattr(news.requests, "post", post)
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14"})
+    assert r.status_code == 200
+    assert r.json()["items"] == LIVE_ITEMS
+    assert r.json()["source"] == "live"
+    assert post.call_count == 2
+    assert "test-key" not in r.text
+
+
+def test_news_three_failures_return_error(monkeypatch, tmp_path):
+    monkeypatch.setenv("BRIGHTDATA_API_KEY", "test-key")
+    monkeypatch.setenv("BRIGHTDATA_ZONE", "z")
+    monkeypatch.setattr(news, "CACHE_PATH", str(tmp_path / "cache.json"))
+    post = Mock(side_effect=[_empty_body()] * 3)
+    monkeypatch.setattr(news.requests, "post", post)
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14"})
+    assert r.status_code == 200
+    assert r.json()["items"] == []
+    assert r.json()["source"] == "error"
+    assert "message" in r.json()
+    assert "empty body" in r.json()["message"]
+    assert post.call_count == 3
+    assert "test-key" not in r.text
+
+
+def test_news_fallback_cache_returns_cached_items(monkeypatch, tmp_path):
+    import json as _json
+
+    monkeypatch.setenv("BRIGHTDATA_API_KEY", "test-key")
+    monkeypatch.setenv("BRIGHTDATA_ZONE", "z")
+    cache_path = tmp_path / "cache.json"
+    cache_path.write_text(_json.dumps({"NVDA|2026-03-14": CACHED_ITEMS}))
+    monkeypatch.setattr(news, "CACHE_PATH", str(cache_path))
+    post = Mock(side_effect=[_empty_body()] * 3)
+    monkeypatch.setattr(news.requests, "post", post)
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14", "fallback": "cache"})
+    assert r.status_code == 200
+    assert r.json()["source"] == "cache"
+    assert r.json()["items"] == CACHED_ITEMS
+    assert "message" not in r.json()
+    assert post.call_count == 3
+    assert "test-key" not in r.text
+
+
+def test_news_fallback_cache_without_entry_returns_error(monkeypatch, tmp_path):
+    monkeypatch.setenv("BRIGHTDATA_API_KEY", "test-key")
+    monkeypatch.setenv("BRIGHTDATA_ZONE", "z")
+    monkeypatch.setattr(news, "CACHE_PATH", str(tmp_path / "cache.json"))
+    post = Mock(side_effect=[_empty_body()] * 3)
+    monkeypatch.setattr(news.requests, "post", post)
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14", "fallback": "cache"})
+    assert r.status_code == 200
+    assert r.json()["source"] == "error"
+    assert r.json()["items"] == []
+
+
+def test_news_cache_hit_never_reports_live(monkeypatch, tmp_path):
+    import json as _json
+
+    monkeypatch.setenv("BRIGHTDATA_API_KEY", "test-key")
+    monkeypatch.setenv("BRIGHTDATA_ZONE", "z")
+    cache_path = tmp_path / "cache.json"
+    cache_path.write_text(_json.dumps({"NVDA|2026-03-14": CACHED_ITEMS}))
+    monkeypatch.setattr(news, "CACHE_PATH", str(cache_path))
+
+    monkeypatch.setattr(news.requests, "post", Mock(return_value=Mock(status_code=429)))
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14"})
+    assert r.json()["source"] == "error"
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14", "fallback": "cache"})
+    assert r.json()["source"] == "cache"
+    assert r.json()["items"] == CACHED_ITEMS
+
+    monkeypatch.setattr(news.requests, "post", Mock(return_value=_ok()))
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14", "fallback": "cache"})
+    assert r.json()["source"] == "live"
+    assert r.json()["items"] == LIVE_ITEMS
+
+
+def test_news_invalid_fallback_400():
+    r = client.get("/news", params={"symbol": "NVDA", "date": "2026-03-14", "fallback": "live"})
+    assert r.status_code == 400
+    assert len(main._news_calls) == 0

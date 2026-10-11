@@ -219,6 +219,13 @@ def activate_insight(request: ActivateRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+def _redact(message: str) -> str:
+    api_key = os.environ.get("BRIGHTDATA_API_KEY")
+    if api_key:
+        message = message.replace(api_key, "***")
+    return message
+
+
 def _allow_news_call() -> bool:
     now = time.monotonic()
     with _news_lock:
@@ -231,7 +238,7 @@ def _allow_news_call() -> bool:
 
 
 @app.get("/news")
-def get_news(symbol: str, date: str):
+def get_news(symbol: str, date: str, fallback: str | None = None):
     symbol = symbol.strip().upper()
     if not SYMBOL_RE.match(symbol):
         raise HTTPException(status_code=400, detail="Invalid symbol")
@@ -241,6 +248,8 @@ def get_news(symbol: str, date: str):
         date_type.fromisoformat(date)
     except ValueError:
         raise HTTPException(status_code=400, detail="date must be YYYY-MM-DD")
+    if fallback not in (None, "cache"):
+        raise HTTPException(status_code=400, detail="fallback must be 'cache'")
 
     if not _allow_news_call():
         raise HTTPException(status_code=429, detail="News rate limit exceeded (10 per minute)")
@@ -248,7 +257,11 @@ def get_news(symbol: str, date: str):
     try:
         items = news.fetch_live_headlines(symbol, date, use_cache=False)
     except Exception as e:
-        return {"symbol": symbol, "date": date, "items": [], "source": "error", "message": f"News lookup failed: {type(e).__name__}: {e}"}
+        if fallback == "cache":
+            cached = news.cached_headlines(symbol, date)
+            if cached is not None:
+                return {"symbol": symbol, "date": date, "items": cached, "source": "cache"}
+        return {"symbol": symbol, "date": date, "items": [], "source": "error", "message": _redact(f"News lookup failed: {type(e).__name__}: {e}")}
     return {"symbol": symbol, "date": date, "items": items, "source": "live"}
 
 
