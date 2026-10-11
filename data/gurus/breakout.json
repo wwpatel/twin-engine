@@ -1,0 +1,426 @@
+{
+  "guru_id": "breakout",
+  "status": "done",
+  "round": 5,
+  "hypotheses": [
+    {
+      "text": "Buy when the market is not weak, meaning SPY's 5-day return is above -1% and the stock is not on a multi-day losing streak.",
+      "status": "kept",
+      "reason": "Matched 97% of discovery trades where it fired (fired on 65%)",
+      "discovery_match": 0.9705882352941176,
+      "holdout_match": 0.8888888888888888
+    },
+    {
+      "text": "Buy when the stock is in a short-term uptrend: above its 20-day moving average and with a positive 3-day return.",
+      "status": "kept",
+      "reason": "Matched 97% of discovery trades where it fired (fired on 55%)",
+      "discovery_match": 0.9655172413793104,
+      "holdout_match": 1.0
+    },
+    {
+      "text": "Buy when there is no short-term stress: SPY's 1-day return is above -1% and the stock's 5-day return is above -5%.",
+      "status": "kept",
+      "reason": "Matched 96% of discovery trades where it fired (fired on 81%)",
+      "discovery_match": 0.9647058823529412,
+      "holdout_match": 0.8536585365853658
+    },
+    {
+      "text": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "status": "kept",
+      "reason": "Matched 82% of discovery trades where it fired (fired on 95%)",
+      "discovery_match": 0.82,
+      "holdout_match": 0.8947368421052632
+    },
+    {
+      "text": "Buy on a day when both the stock and SPY rose; sell when both fell and the stock has a down-day streak of at least 1.",
+      "status": "kept",
+      "reason": "Matched 78% of discovery trades where it fired (fired on 81%)",
+      "discovery_match": 0.7764705882352941,
+      "holdout_match": 0.6571428571428571
+    }
+  ],
+  "baseline": {
+    "text": "Buys after any down day (ret_1d < 0)",
+    "holdout_match": 0.7368421052631579
+  },
+  "exceptions": [
+    {
+      "date": "2025-02-07",
+      "symbol": "AMZN",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Amazon.com, Inc. (AMZN.TO) Stock Price, News, Quote & History",
+        "Amazon issues disappointing revenue forecast, points to weakest growth on record",
+        "Amazon Stock Crushed the Market in 2024. Can It Repeat in 2025?"
+      ],
+      "outcome_pct": 0.21
+    },
+    {
+      "date": "2025-02-25",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Tesla (TSLA): Buy, Sell or Hold?",
+        "Tesla Inc (TSLA) DCF Valuation: Is The Stock Undervalued?"
+      ],
+      "outcome_pct": -10.16
+    },
+    {
+      "date": "2025-02-25",
+      "symbol": "META",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Meta reduces stock options for staff despite trading at record highs, FT reports",
+        "Meta stock just received its highest-ever price target",
+        "Meta\u2019s record winning streak puts stock split in view"
+      ],
+      "outcome_pct": -2.1
+    },
+    {
+      "date": "2025-03-05",
+      "symbol": "MSFT",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Is Microsoft Corporation (MSFT) Buying Back Its Stock in 2025?",
+        "Analyst doubles down on Microsoft stock price prediction \u2014 Buy time?"
+      ],
+      "outcome_pct": -3.3
+    },
+    {
+      "date": "2025-03-10",
+      "symbol": "COST",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "No clear cause in the news"
+      ],
+      "outcome_pct": -1.07
+    },
+    {
+      "date": "2025-04-04",
+      "symbol": "MSFT",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Why Microsoft Stock Is Down? MSFT Share Tests 15-Month Low but 2025 Price Predictions Remain Bullish",
+        "MSFT,META,NVDA,GOOGL,AAPL,TSLA,AMZN | Stock Prices | Quote Comparison",
+        "Microsoft turns 50. Here are 18 of its biggest moments"
+      ],
+      "outcome_pct": 9.22
+    },
+    {
+      "date": "2025-04-04",
+      "symbol": "META",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Meta Continues to Outperform Magnificent 7 Peers. These Are the Risks.",
+        "Trade Tracker: Stephanie Link buys Meta",
+        "Meta Platforms Stock: Buy, Hold, or Sell?"
+      ],
+      "outcome_pct": 8.22
+    },
+    {
+      "date": "2025-04-07",
+      "symbol": "XOM",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Exxon Mobil (XOM): One of the Best Dividend Aristocrat Stocks with Over 3% Yield"
+      ],
+      "outcome_pct": 5.27
+    },
+    {
+      "date": "2025-04-11",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Tesla Stock Booked Its Second Best Single Day Gain In History. This Is Why Analysts Cut Price Targets.",
+        "Why Tesla's Biggest Bull Just Slashed the EV Maker's Price Target",
+        "Tesla Bull Slashes Stock Price Target 43%, Citing Musk and Trump"
+      ],
+      "outcome_pct": -9.83
+    },
+    {
+      "date": "2025-05-28",
+      "symbol": "XOM",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "ExxonMobil & Other Global Energy Giants Explore Partnership With ONGC"
+      ],
+      "outcome_pct": -4.05
+    },
+    {
+      "date": "2025-07-02",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy on a day when both the stock and SPY rose; sell when both fell and the stock has a down-day streak of at least 1.",
+      "note": null,
+      "context": [
+        "Here's How Much Traders Expect Tesla Stock to Move After Deliveries Data Due Wednesday",
+        "Tesla's IPO was 15 years ago. The stock is up almost 300-fold since then",
+        "The 3 moments that have defined Tesla's wild ride in the stock market this year"
+      ],
+      "outcome_pct": -1.83
+    },
+    {
+      "date": "2025-07-30",
+      "symbol": "COST",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "note": null,
+      "context": [
+        "Cost pressures limit Molina Healthcare during Q2 earnings as stock dips",
+        "The Best Stock to Buy Right Now: Costco vs. Walmart"
+      ],
+      "outcome_pct": -5.18
+    },
+    {
+      "date": "2025-02-07",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Tesla CFO, chairwoman, and Elon\u2019s brother sold tens of millions worth of TSLA stock",
+        "Tesla Stock Price Prediction 2030: Can TSLA Become the World\u2019s Most Valuable Company?",
+        "Tesla\u2019s \u2018Supercharged Narrative\u2019 Shreds Stock\u2019s Valuation Models (TSLA)"
+      ],
+      "outcome_pct": -1.6
+    },
+    {
+      "date": "2026-03-26",
+      "symbol": "MSFT",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Microsoft Corporation (MSFT) Is a Trending Stock: Facts to Know Before Betting on It",
+        "Is Microsoft Stock Poised for a Rally?",
+        "Why Microsoft (MSFT) Stock Is Ripe for a Turnaround"
+      ],
+      "outcome_pct": -2.46
+    }
+  ],
+  "summary": {
+    "followed_pct": 0.9066666666666666,
+    "return_when_followed": 0.82,
+    "return_when_broken": -1.33,
+    "n_broke_rule": 12,
+    "n_unexplained": 2
+  },
+  "insights": [
+    {
+      "id": "rule_1",
+      "title": "Buy when the market is not weak, meaning SPY's 5-day return is above -1% and the stock is not on a multi-day losing streak.",
+      "plain": "Buy when the market is not weak, meaning SPY's 5-day return is above -1% and the stock is not on a multi-day losing streak.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.9705882352941176,
+        "holdout_match": 0.8888888888888888,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": "r1"
+    },
+    {
+      "id": "rule_2",
+      "title": "Buy when the stock is in a short-term uptrend: above its 20-day moving average and with a positive 3-day return.",
+      "plain": "Buy when the stock is in a short-term uptrend: above its 20-day moving average and with a positive 3-day return.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.9655172413793104,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": "r2"
+    },
+    {
+      "id": "rule_3",
+      "title": "Buy when there is no short-term stress: SPY's 1-day return is above -1% and the stock's 5-day return is above -5%.",
+      "plain": "Buy when there is no short-term stress: SPY's 1-day return is above -1% and the stock's 5-day return is above -5%.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.9647058823529412,
+        "holdout_match": 0.8536585365853658,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": "r3"
+    },
+    {
+      "id": "rule_4",
+      "title": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "plain": "Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.82,
+        "holdout_match": 0.8947368421052632,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": "r4"
+    },
+    {
+      "id": "rule_5",
+      "title": "Buy on a day when both the stock and SPY rose; sell when both fell and the stock has a down-day streak of at least 1.",
+      "plain": "Buy on a day when both the stock and SPY rose; sell when both fell and the stock has a down-day streak of at least 1.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.7764705882352941,
+        "holdout_match": 0.6571428571428571,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": "r5"
+    },
+    {
+      "id": "exception_1",
+      "title": "Exceptions in TSLA",
+      "plain": "The trader broke their rules in 4 trades of TSLA.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 4,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_2",
+      "title": "Exceptions in META",
+      "plain": "The trader broke their rules in 2 trades of META.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 2,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_3",
+      "title": "Exceptions in MSFT",
+      "plain": "The trader broke their rules in 3 trades of MSFT.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 3,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_4",
+      "title": "Exceptions in COST",
+      "plain": "The trader broke their rules in 2 trades of COST.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 2,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_5",
+      "title": "Exceptions in XOM",
+      "plain": "The trader broke their rules in 2 trades of XOM.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 2,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_6",
+      "title": "Exceptions on sell trades",
+      "plain": "The trader broke their rules in 4 sell trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 4,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_7",
+      "title": "Exceptions on buy trades",
+      "plain": "The trader broke their rules in 10 buy trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 10,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_8",
+      "title": "Exceptions breaking 'Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.'",
+      "plain": "The trader broke the rule 'Buy when earnings are not imminent (more than 5 days away) and the stock is not stretched far below its 20-day average; sell when SPY is falling over 5 days and the stock is below its 20-day average.' in 11 trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 11,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_9",
+      "title": "Exceptions breaking 'None'",
+      "plain": "The trader broke the rule 'None' in 2 trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 2,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.7368421052631579
+      },
+      "rule_code_id": null
+    }
+  ]
+}

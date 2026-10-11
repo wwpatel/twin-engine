@@ -1,0 +1,7 @@
+{
+  "r1": "def rule(row):\n    if row[\"ret_5d\"] < -0.01:\n        return \"buy\"\n    return None",
+  "r2": "def rule(row):\n    d = row.get(\"dist_from_ma20\")\n    if d is None:\n        return None\n    if d < -0.01:\n        return \"buy\"\n    return None",
+  "r3": "def rule(row):\n    s = row.get(\"spy_ret_5d\")\n    if s is not None and s < -0.01:\n        return \"buy\"\n    return None",
+  "r4": "def rule(row):\n    s = row.get(\"down_day_streak\")\n    if s is not None and s >= 3:\n        return \"buy\"\n    return None",
+  "r5": "def rule(row):\n    r = row.get(\"ret_3d\")\n    if r is not None and r < -0.01:\n        return \"buy\"\n    return None"
+}

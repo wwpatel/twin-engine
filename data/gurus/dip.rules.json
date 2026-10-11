@@ -1,0 +1,6 @@
+{
+  "r1": "def rule(row):\n    if row[\"down_day_streak\"] >= 2:\n        return \"buy\"\n    return None",
+  "r2": "def rule(row):\n    if (row[\"ret_5d\"] > 0.025 and row[\"ret_3d\"] > 0.01\n            and row[\"down_day_streak\"] == 0\n            and row[\"spy_ret_1d\"] < 0.012):\n        return \"sell\"\n    return None",
+  "r3": "def rule(row):\n    if row[\"spy_ret_1d\"] <= -0.008:\n        return \"buy\"\n    return None",
+  "r4": "def rule(row):\n    d = row.get(\"dist_from_ma20\")\n    if d is None:\n        return None\n    if d < -0.01:\n        return \"buy\"\n    return None"
+}

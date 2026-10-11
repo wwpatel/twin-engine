@@ -1,0 +1,979 @@
+{
+  "guru_id": "dip",
+  "status": "done",
+  "round": 5,
+  "hypotheses": [
+    {
+      "text": "Buy when the stock has been falling for at least 2 consecutive down days (a dip-buying pattern).",
+      "status": "kept",
+      "reason": "Matched 96% of discovery trades where it fired (fired on 48%)",
+      "discovery_match": 0.96,
+      "holdout_match": 1.0
+    },
+    {
+      "text": "Sell when the stock is extended above its 20-day MA (>2.5%) after a positive 3-day run, with no current down-day streak (profit-taking into strength).",
+      "status": "rejected",
+      "reason": "Matched 58% of discovery trades where it fired (needs 65%)",
+      "discovery_match": 0.5769230769230769,
+      "holdout_match": null
+    },
+    {
+      "text": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "status": "kept",
+      "reason": "Matched 68% of discovery trades where it fired (fired on 18%)",
+      "discovery_match": 0.6842105263157895,
+      "holdout_match": 0.8888888888888888
+    },
+    {
+      "text": "Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.",
+      "status": "kept",
+      "reason": "Matched 88% of discovery trades where it fired (fired on 25%)",
+      "discovery_match": 0.8846153846153846,
+      "holdout_match": 0.7777777777777778
+    },
+    {
+      "text": "Buy when the stock is trading below its 20-day moving average by more than 1%, which looks like buying weakness. The sells are almost all above the MA.",
+      "status": "kept",
+      "reason": "Matched 93% of discovery trades where it fired (fired on 29%)",
+      "discovery_match": 0.9333333333333333,
+      "holdout_match": 1.0
+    }
+  ],
+  "baseline": {
+    "text": "Buys after any down day (ret_1d < 0)",
+    "holdout_match": 0.9259259259259259
+  },
+  "exceptions": [
+    {
+      "date": "2025-02-24",
+      "symbol": "AAPL",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.",
+      "note": null,
+      "context": [
+        "Can Apple Stock Reach $1,000?",
+        "Apple (AAPL) Stock Gets $294 Price Target from Goldman Sachs",
+        "3 Reasons to Buy Apple Stock Like There's No Tomorrow"
+      ],
+      "outcome_pct": 3.08
+    },
+    {
+      "date": "2025-03-19",
+      "symbol": "XOM",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.",
+      "note": null,
+      "context": [
+        "Where Will ExxonMobil Be in 5 Years?"
+      ],
+      "outcome_pct": -7.41
+    },
+    {
+      "date": "2025-04-09",
+      "symbol": "AAPL",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when the stock has been falling for at least 2 consecutive down days (a dip-buying pattern).",
+      "note": null,
+      "context": [
+        "Apple Plunges 9%, Leading a Tech Sell-Off (Published 2025)",
+        "Apple leads a drop in tech stocks after Trump tariff announcement",
+        "Apple Stock Falls Again. How the Rest of the Mag 7 Are Trading."
+      ],
+      "outcome_pct": 1.7
+    },
+    {
+      "date": "2025-04-28",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "note": null,
+      "context": [
+        "Why Tesla Stock Just Had Its Best Week Since November",
+        "Elon Musk Net Worth Swells $8 Billion As TSLA Stock Soars",
+        "Tesla reports 20% drop in auto revenue as first-quarter results miss Wall Street estimates"
+      ],
+      "outcome_pct": -1.97
+    },
+    {
+      "date": "2025-06-24",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "note": null,
+      "context": [
+        "How Tesla Stock Is Responding To The Robotaxi Launch",
+        "Robotaxi Sunday Foreshadows Tesla's Next Big Thing - Buy Call (NASDAQ:TSLA)",
+        "Tesla\u2019s (TSLA stock) $557M Shanghai Megapack Project: Powering China\u2019s Clean Energy Future"
+      ],
+      "outcome_pct": -11.68
+    },
+    {
+      "date": "2025-07-31",
+      "symbol": "META",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when the stock has been falling for at least 2 consecutive down days (a dip-buying pattern).",
+      "note": null,
+      "context": [
+        "Meta Shares Soar as Ad Business Continues to Fuel AI Ambitions",
+        "Meta shares climb 10% on revenue beat, raised forecast",
+        "What Analysts Think of Meta Stock Ahead of Earnings"
+      ],
+      "outcome_pct": 1.1
+    },
+    {
+      "date": "2025-07-31",
+      "symbol": "GOOGL",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "note": null,
+      "context": [
+        "Google Revenue Soars on AI Boom, and Investors Eye Spending Surge",
+        "What Analysts Think of Google Parent Alphabet's Stock Ahead of Earnings",
+        "Google Looks Cheap Through A Long-Term Lens (NASDAQ:GOOG)"
+      ],
+      "outcome_pct": 2.77
+    },
+    {
+      "date": "2025-08-29",
+      "symbol": "GOOGL",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "note": null,
+      "context": [
+        "A $10 Billion Reason to Buy Google Stock Now",
+        "Alphabet: Market Acknowledging Moats, Stock Approaches Fair Value (NASDAQ:GOOGL)",
+        "Alphabet Just Scored Big With Meta: Is GOOGL Stock Poised for Another Leg Higher?"
+      ],
+      "outcome_pct": 10.31
+    },
+    {
+      "date": "2025-09-22",
+      "symbol": "AAPL",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "note": null,
+      "context": [
+        "Apple Stock's Not-So-Magnificent Year: Can AI, iPhone 17 Close the Gap with Big Tech Peers?",
+        "Here\u2019s how Apple\u2019s stock could evolve from AI laggard into a big winner",
+        "Apple Stock Gains. What Preorders Say About iPhone 17 Demand."
+      ],
+      "outcome_pct": -0.28
+    },
+    {
+      "date": "2025-10-28",
+      "symbol": "MSFT",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "note": null,
+      "context": [
+        "MSFT vs. AAPL: Which Mega-Cap Tech Stock is the Better Buy Now?",
+        "Microsoft: Golden Buying Opportunity Before Earnings (NASDAQ:MSFT)",
+        "Apple vs. Microsoft: Which Stock Will Make You Richer by 2030?"
+      ],
+      "outcome_pct": -4.34
+    },
+    {
+      "date": "2025-11-14",
+      "symbol": "XOM",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.",
+      "note": null,
+      "context": [
+        "All It Takes Is $2,850 Invested in ExxonMobil to Generate Over $100 in Passive Income Each Year",
+        "Xom Stock Forecast: What is the future forecast for XOM?",
+        "XOM Dec 2027 150.000 put (XOM271217P00150000) Stock Price, News, Quote & History"
+      ],
+      "outcome_pct": -0.12
+    },
+    {
+      "date": "2025-11-21",
+      "symbol": "GOOGL",
+      "side": "sell",
+      "exception_type": "broke_rule",
+      "broke_rule": "Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.",
+      "note": null,
+      "context": [
+        "Is GOOGL Stock a Buy, Sell, or Hold as Google Launches Gemini 3?",
+        "Google Stock Is Crushing the Rest of the Magnificent Seven\u2014Here's Why",
+        "Alphabet shares hit record after Berkshire makes rare tech bet with $4.9 billion stake"
+      ],
+      "outcome_pct": -5.36
+    },
+    {
+      "date": "2026-06-02",
+      "symbol": "NVDA",
+      "side": "buy",
+      "exception_type": "broke_rule",
+      "broke_rule": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "note": null,
+      "context": [
+        "Why Is Nvidia (NVDA) Stock Soaring Today",
+        "Nvidia Stock: A Path To $10 Trillion?",
+        "NVIDIA CORP (NASDAQ:NVDA) Stands Out as a Strong Growth Stock with a Good Technical Setup"
+      ],
+      "outcome_pct": -6.35
+    },
+    {
+      "date": "2025-01-14",
+      "symbol": "JPM",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "What Analysts Think of JPMorgan Chase Stock Ahead of Earnings",
+        "JPM Forecast \u2014 Price Prediction for 2026. Should I Buy JPM?"
+      ],
+      "outcome_pct": 9.98
+    },
+    {
+      "date": "2025-01-14",
+      "symbol": "XOM",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "XOM Forecast \u2014 Price Prediction for 2026. Should I Buy XOM?",
+        "Exxon Mobil, Palo Alto, Adobe fall premarket; Nvidia rises By Investing.com"
+      ],
+      "outcome_pct": 5.57
+    },
+    {
+      "date": "2025-02-25",
+      "symbol": "COST",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "No clear cause in the news"
+      ],
+      "outcome_pct": -0.94
+    },
+    {
+      "date": "2025-04-10",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "TSLA roller-coaster ride: Tesla sees largest-ever drop in vehicle deliveries, but report says Musk could leave DOGE",
+        "Tesla Bull Slashes Stock Price Target 43%, Citing Musk and Trump",
+        "Why Tesla's Biggest Bull Just Slashed the EV Maker's Price Target"
+      ],
+      "outcome_pct": -4.37
+    },
+    {
+      "date": "2025-05-01",
+      "symbol": "MSFT",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "If You Invested $10K In Microsoft Stock 10 Years Ago, How Much Would You Have Now?",
+        "Meta, Microsoft reports lift AI-related stocks",
+        "Microsoft shares jump 9% on earnings and revenue beat, uplifting forecast"
+      ],
+      "outcome_pct": -4.21
+    },
+    {
+      "date": "2025-05-02",
+      "symbol": "COST",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Rising Costs of Biologics for Plaque Psoriasis Highlight Savings Potential",
+        "Super Micro stock plunges after surprise customer delays cost up to $1.4 billion in sales"
+      ],
+      "outcome_pct": -0.7
+    },
+    {
+      "date": "2025-05-02",
+      "symbol": "GOOGL",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Google stock rises after it beats on earnings, raises dividend, and authorizes $70 billion in buybacks",
+        "Alphabet's Q1 earnings shattered analyst expectations, sending the stock soaring. Google's CEO credits its AI efforts.",
+        "Google Earnings: Stock Soars As Q1 Results Shatter Expectations"
+      ],
+      "outcome_pct": -6.44
+    },
+    {
+      "date": "2025-05-06",
+      "symbol": "GOOGL",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Alphabet Rebounds After Strong Earnings and Buyback Announcement",
+        "Reddit stock slides as investors weigh Google Search traffic, user growth concerns",
+        "What an Alphabet Breakup Would Mean for the Stock"
+      ],
+      "outcome_pct": -1.81
+    },
+    {
+      "date": "2025-05-28",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "NIO vs. TSLA: Which EV Stock Has More Charge for the Future?",
+        "Is Tesla Stock A Good Investment? Why This Trader Says It Depends",
+        "Tesla stock gets a huge price target hike as Wedbush hails 'golden age of autonomous growth'"
+      ],
+      "outcome_pct": -6.96
+    },
+    {
+      "date": "2025-06-13",
+      "symbol": "JPM",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Where Will JPMorgan Chase Be in 5 Years?",
+        "'Still Quite Constructive' on Chinese Stocks in Second Half of 2025: JPM Private Bank"
+      ],
+      "outcome_pct": 8.09
+    },
+    {
+      "date": "2025-07-22",
+      "symbol": "AAPL",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Apple Faces Calls to Reboot AI Strategy With Shares Slumping",
+        "Apple Stock\u2019s 4 Biggest Competitors \u2014 Should You Invest?",
+        "Should You Buy or Sell Apple Stock Before July 31? The Answer May Surprise You"
+      ],
+      "outcome_pct": 0.98
+    },
+    {
+      "date": "2025-08-07",
+      "symbol": "NVDA",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Should You Buy Nvidia (NVDA) Stock Before Aug. 27? Here's What History Says.",
+        "Nvidia Hits Highs As Meta, Microsoft Unveil AI Spending Plans \u2014 Is Nvidia Stock A Buy Or Sell Now?",
+        "If You'd Invested $3,000 in Nvidia (NVDA) Stock 20 Years Ago, Here's How Much You'd Have Today"
+      ],
+      "outcome_pct": -0.94
+    },
+    {
+      "date": "2025-08-08",
+      "symbol": "META",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Meta shares jump as AI fuels ad sales, outweighing big capital costs",
+        "Meta Stock: Facebook Parent Surges Near Record High. Everything to Know About Its Blowout Earnings."
+      ],
+      "outcome_pct": 2.49
+    },
+    {
+      "date": "2025-08-08",
+      "symbol": "META",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Meta shares jump as AI fuels ad sales, outweighing big capital costs",
+        "Meta Stock: Facebook Parent Surges Near Record High. Everything to Know About Its Blowout Earnings."
+      ],
+      "outcome_pct": 2.49
+    },
+    {
+      "date": "2025-08-08",
+      "symbol": "GOOGL",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "5 Reasons Alphabet Is the Smartest Stock to Buy Right Now",
+        "Meta vs. Alphabet Stock: The Case for Buying One, Not the Other, After Earnings",
+        "Roundhill GOOGL WeeklyPay ETF (GOOW) Stock Forum & Discussion"
+      ],
+      "outcome_pct": 1.59
+    },
+    {
+      "date": "2025-08-25",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Tesla Stock or a 4.50% CD: Where Should You Put $10K in 2025?",
+        "Tesla Is in the S&P 500: 4 Things That Means for Investors in 2025",
+        "Tesla Stock Recharges \u2014 Flashing These Three Telltale Clues"
+      ],
+      "outcome_pct": -4.97
+    },
+    {
+      "date": "2025-08-26",
+      "symbol": "GOOGL",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Google Penalized for Anti-Competitive Android Deals with Telecoms",
+        "Alphabet: Market Acknowledging Moats, Stock Approaches Fair Value (NASDAQ:GOOGL)",
+        "Alphabet Just Scored Big With Meta: Is GOOGL Stock Poised for Another Leg Higher?"
+      ],
+      "outcome_pct": -11.74
+    },
+    {
+      "date": "2025-09-17",
+      "symbol": "META",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Meta Stock Forecast: Where Analysts See the Stock Going by 2027",
+        "Meta Stock Rises. This Is Its New AI Product.",
+        "3 Reasons Meta Platforms Is a Great Dividend Stock"
+      ],
+      "outcome_pct": -1.54
+    },
+    {
+      "date": "2025-09-24",
+      "symbol": "JPM",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "JPMorgan\u2019s (JPM) Dividend Strategy: A Key to Its Best Performing in 2025 Status",
+        "Here's why Jim Cramer thinks JPMorgan could be the next non-tech stock to reach a $1 trillion valuation"
+      ],
+      "outcome_pct": 1.54
+    },
+    {
+      "date": "2025-09-24",
+      "symbol": "NVDA",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "NVIDIA and Intel to Develop AI Infrastructure and Personal Computing Products",
+        "Analyst Explains Why He\u2019s Selling Nvidia (NVDA) \u2013 \u2018I Know It Sounds Crazy\u2019",
+        "AVGO Stock vs. NVDA & INTC"
+      ],
+      "outcome_pct": 6.06
+    },
+    {
+      "date": "2025-10-02",
+      "symbol": "AAPL",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Apple's $600B U.S. Bet: AI, Infrastructure, and Buffett's Exit",
+        "Can Apple Stock Hit $310 in 2025?",
+        "Apple Stock Positioned for Holiday Gains With iPhone 17 Boost"
+      ],
+      "outcome_pct": -0.84
+    },
+    {
+      "date": "2025-10-07",
+      "symbol": "TSLA",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Tesla (TSLA) Stock Rises Over $450, Hits Record $1.5T Market Cap as Q3 Delivery Test Looms",
+        "Tesla deliveries rise 7% before EV tax credits expire",
+        "Tesla's $1 Trillion AI Gamble Sends Stock Soaring--But Can Musk Deliver?"
+      ],
+      "outcome_pct": -0.89
+    },
+    {
+      "date": "2025-10-28",
+      "symbol": "JPM",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "JPMorgan Chase could be the next company to hit $1 trillion in market cap, Jim Cramer says"
+      ],
+      "outcome_pct": 3.22
+    },
+    {
+      "date": "2025-11-11",
+      "symbol": "NVDA",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Analysts Say Nvidia Stock Is \u2018Dominant\u2019 Amid a Giant Race to \u2018Secure Compute.\u2019 Buy Shares Now?",
+        "Nvidia and Palantir Stocks Are Falling Today. Here\u2019s Why"
+      ],
+      "outcome_pct": -5.88
+    },
+    {
+      "date": "2025-12-26",
+      "symbol": "MSFT",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Is Microsoft Undervalued by Investors? These Tech Stock Experts Think So.",
+        "MSFT vrs GOOG: Which Stock Will Cross the $4 Trillion Milestone First?"
+      ],
+      "outcome_pct": -2.43
+    },
+    {
+      "date": "2026-01-05",
+      "symbol": "JPM",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "JPMorgan Chase & Co. (JPM.TO) Stock Price, News, Quote & History",
+        "JPMorgan Chase & Co. Stock (JPM) Opinions on 2026 Expense Warning | JPM Stock News"
+      ],
+      "outcome_pct": 0.99
+    },
+    {
+      "date": "2026-01-06",
+      "symbol": "AMZN",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Why Amazon stock could have nearly 50% upside in 2026",
+        "Where Will Amazon (AMZN) Stock Be in 3 Years?",
+        "What to Expect From Amazon in the 4 Weeks Before Earnings"
+      ],
+      "outcome_pct": -0.69
+    },
+    {
+      "date": "2026-02-09",
+      "symbol": "NVDA",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Why Is Nvidia (NVDA) Stock Soaring Today",
+        "Is NVIDIA Stock Built to Withstand More Downside?",
+        "Can AI Demand Drive NVDA Stock To $240?"
+      ],
+      "outcome_pct": 2.44
+    },
+    {
+      "date": "2026-02-09",
+      "symbol": "AAPL",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Apple Stock Could Surge to $300: Here\u2019s What Needs to Happen",
+        "Apple Earnings: Impressive Q4 Lifts Stock, but Is It a Long-Term Growth Play?",
+        "Is Apple Stock Still a Buy in 2026 After 10% Returns Last Year?"
+      ],
+      "outcome_pct": -3.74
+    },
+    {
+      "date": "2026-05-22",
+      "symbol": "AMZN",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "Here is What to Know Beyond Why Amazon.com, Inc. (AMZN) is a Trending Stock",
+        "The Next Big Rally in Amazon.com Stock Could Start Like This",
+        "Amazon Stock (AMZN) Opinions on Strong AWS Growth Amid Valuation Discussions"
+      ],
+      "outcome_pct": -1.9
+    },
+    {
+      "date": "2026-06-16",
+      "symbol": "JPM",
+      "side": "sell",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "JPMorgan Chase & Co. (JPM) Stock Moves -1.12%: What You Should Know"
+      ],
+      "outcome_pct": -1.66
+    },
+    {
+      "date": "2026-06-16",
+      "symbol": "JPM",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "JPMorgan Chase & Co. (JPM) Stock Moves -1.12%: What You Should Know"
+      ],
+      "outcome_pct": 1.66
+    }
+  ],
+  "summary": {
+    "followed_pct": 0.7,
+    "return_when_followed": 1.17,
+    "return_when_broken": -0.76,
+    "n_broke_rule": 13,
+    "n_unexplained": 32
+  },
+  "insights": [
+    {
+      "id": "rule_1",
+      "title": "Buy when the stock has been falling for at least 2 consecutive down days (a dip-buying pattern).",
+      "plain": "Buy when the stock has been falling for at least 2 consecutive down days (a dip-buying pattern).",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.96,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": "r1"
+    },
+    {
+      "id": "rule_2",
+      "title": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "plain": "Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.6842105263157895,
+        "holdout_match": 0.8888888888888888,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": "r2"
+    },
+    {
+      "id": "rule_3",
+      "title": "Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.",
+      "plain": "Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.8846153846153846,
+        "holdout_match": 0.7777777777777778,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": "r3"
+    },
+    {
+      "id": "rule_4",
+      "title": "Buy when the stock is trading below its 20-day moving average by more than 1%, which looks like buying weakness. The sells are almost all above the MA.",
+      "plain": "Buy when the stock is trading below its 20-day moving average by more than 1%, which looks like buying weakness. The sells are almost all above the MA.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 0.9333333333333333,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": "r4"
+    },
+    {
+      "id": "exception_1",
+      "title": "Exceptions in AAPL",
+      "plain": "The trader broke their rules in 6 trades of AAPL.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 6,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_2",
+      "title": "Exceptions in XOM",
+      "plain": "The trader broke their rules in 3 trades of XOM.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 3,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_3",
+      "title": "Exceptions in TSLA",
+      "plain": "The trader broke their rules in 6 trades of TSLA.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 6,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_4",
+      "title": "Exceptions in META",
+      "plain": "The trader broke their rules in 4 trades of META.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 4,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_5",
+      "title": "Exceptions in GOOGL",
+      "plain": "The trader broke their rules in 7 trades of GOOGL.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 7,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_6",
+      "title": "Exceptions in MSFT",
+      "plain": "The trader broke their rules in 3 trades of MSFT.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 3,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_7",
+      "title": "Exceptions in NVDA",
+      "plain": "The trader broke their rules in 5 trades of NVDA.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 5,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_8",
+      "title": "Exceptions in JPM",
+      "plain": "The trader broke their rules in 7 trades of JPM.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 7,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_9",
+      "title": "Exceptions in COST",
+      "plain": "The trader broke their rules in 2 trades of COST.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 2,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_10",
+      "title": "Exceptions in AMZN",
+      "plain": "The trader broke their rules in 2 trades of AMZN.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 2,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_11",
+      "title": "Exceptions on sell trades",
+      "plain": "The trader broke their rules in 15 sell trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 15,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_12",
+      "title": "Exceptions on buy trades",
+      "plain": "The trader broke their rules in 30 buy trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 30,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_13",
+      "title": "Exceptions breaking 'Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.'",
+      "plain": "The trader broke the rule 'Buy when the overall market (SPY) fell at least 0.8% on the day, which looks like buying into a market-wide selloff.' in 4 trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 4,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_14",
+      "title": "Exceptions breaking 'Buy when the stock has been falling for at least 2 consecutive down days (a dip-buying pattern).'",
+      "plain": "The trader broke the rule 'Buy when the stock has been falling for at least 2 consecutive down days (a dip-buying pattern).' in 2 trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 2,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_15",
+      "title": "Exceptions breaking 'Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.'",
+      "plain": "The trader broke the rule 'Sell when the stock is in a steady short-term uptrend (5-day return above 2.5%, 3-day return above 1%) with no down-day streak and a non-spiking market day.' in 7 trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 7,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_16",
+      "title": "Exceptions breaking 'None'",
+      "plain": "The trader broke the rule 'None' in 32 trades.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 32,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_17",
+      "title": "Exceptions related to report",
+      "plain": "The trader broke their rules in 3 trades where news mentioned report.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 3,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_18",
+      "title": "Exceptions related to beat",
+      "plain": "The trader broke their rules in 3 trades where news mentioned beat.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 3,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_19",
+      "title": "Exceptions related to earnings",
+      "plain": "The trader broke their rules in 14 trades where news mentioned earnings.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 14,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    },
+    {
+      "id": "exception_20",
+      "title": "Exceptions related to dividend",
+      "plain": "The trader broke their rules in 3 trades where news mentioned dividend.",
+      "kind": "exception_pattern",
+      "evidence": {
+        "n_trades": 3,
+        "discovery_match": null,
+        "holdout_match": null,
+        "baseline_holdout_match": 0.9259259259259259
+      },
+      "rule_code_id": null
+    }
+  ]
+}
