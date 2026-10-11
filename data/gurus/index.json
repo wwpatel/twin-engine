@@ -1,0 +1,20 @@
+[
+  {
+    "id": "dip",
+    "name": "Sample trader: Dip Buyer",
+    "style": "dip",
+    "bio": "Buys quality names after several consecutive down days and sells into the rebound."
+  },
+  {
+    "id": "breakout",
+    "name": "Sample trader: Breakout",
+    "style": "breakout",
+    "bio": "Buys stocks breaking out above their 20-day average on strong momentum and sells when momentum fades."
+  },
+  {
+    "id": "defensive",
+    "name": "Sample trader: Defensive",
+    "style": "defensive",
+    "bio": "Trims positions when the broad market weakens and only adds exposure on calm, rising days."
+  }
+]

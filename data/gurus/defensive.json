@@ -1,0 +1,136 @@
+{
+  "guru_id": "defensive",
+  "status": "done",
+  "round": 5,
+  "hypotheses": [
+    {
+      "text": "Buy after a pullback: when the stock's 5-day return is below -1%, predict a buy.",
+      "status": "kept",
+      "reason": "Matched 100% of discovery trades where it fired (fired on 76%)",
+      "discovery_match": 1.0,
+      "holdout_match": 1.0
+    },
+    {
+      "text": "Buy when the stock trades more than 1% below its 20-day moving average.",
+      "status": "kept",
+      "reason": "Matched 100% of discovery trades where it fired (fired on 70%)",
+      "discovery_match": 1.0,
+      "holdout_match": 1.0
+    },
+    {
+      "text": "Buy when the broad market (SPY) has fallen more than 1% over the past 5 days.",
+      "status": "kept",
+      "reason": "Matched 100% of discovery trades where it fired (fired on 100%)",
+      "discovery_match": 1.0,
+      "holdout_match": 1.0
+    },
+    {
+      "text": "Buy when the stock has closed down for at least 3 consecutive days (down-day streak of 3 or more).",
+      "status": "kept",
+      "reason": "Matched 100% of discovery trades where it fired (fired on 54%)",
+      "discovery_match": 1.0,
+      "holdout_match": 1.0
+    },
+    {
+      "text": "Buy when the stock's 3-day return is below -1% (a short-term pullback).",
+      "status": "kept",
+      "reason": "Matched 100% of discovery trades where it fired (fired on 66%)",
+      "discovery_match": 1.0,
+      "holdout_match": 1.0
+    }
+  ],
+  "baseline": {
+    "text": "Buys after any down day (ret_1d < 0)",
+    "holdout_match": 1.0
+  },
+  "exceptions": [
+    {
+      "date": "2026-02-12",
+      "symbol": "META",
+      "side": "buy",
+      "exception_type": "unexplained",
+      "broke_rule": null,
+      "note": "No kept rule covers this trade",
+      "context": [
+        "After Earnings, Is Meta Stock a Buy, a Sell, or Fairly Valued?",
+        "Is Meta Platforms Stock Going to $1,000?",
+        "Ackman's hedge fund Pershing Square bets on Meta, exits Hilton"
+      ],
+      "outcome_pct": 1.16
+    }
+  ],
+  "summary": {
+    "followed_pct": 0.9933333333333333,
+    "return_when_followed": 1.17,
+    "return_when_broken": 1.16,
+    "n_broke_rule": 0,
+    "n_unexplained": 1
+  },
+  "insights": [
+    {
+      "id": "rule_1",
+      "title": "Buy after a pullback: when the stock's 5-day return is below -1%, predict a buy.",
+      "plain": "Buy after a pullback: when the stock's 5-day return is below -1%, predict a buy.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 1.0,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 1.0
+      },
+      "rule_code_id": "r1"
+    },
+    {
+      "id": "rule_2",
+      "title": "Buy when the stock trades more than 1% below its 20-day moving average.",
+      "plain": "Buy when the stock trades more than 1% below its 20-day moving average.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 1.0,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 1.0
+      },
+      "rule_code_id": "r2"
+    },
+    {
+      "id": "rule_3",
+      "title": "Buy when the broad market (SPY) has fallen more than 1% over the past 5 days.",
+      "plain": "Buy when the broad market (SPY) has fallen more than 1% over the past 5 days.",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 1.0,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 1.0
+      },
+      "rule_code_id": "r3"
+    },
+    {
+      "id": "rule_4",
+      "title": "Buy when the stock has closed down for at least 3 consecutive days (down-day streak of 3 or more).",
+      "plain": "Buy when the stock has closed down for at least 3 consecutive days (down-day streak of 3 or more).",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 1.0,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 1.0
+      },
+      "rule_code_id": "r4"
+    },
+    {
+      "id": "rule_5",
+      "title": "Buy when the stock's 3-day return is below -1% (a short-term pullback).",
+      "plain": "Buy when the stock's 3-day return is below -1% (a short-term pullback).",
+      "kind": "rule",
+      "evidence": {
+        "n_trades": null,
+        "discovery_match": 1.0,
+        "holdout_match": 1.0,
+        "baseline_holdout_match": 1.0
+      },
+      "rule_code_id": "r5"
+    }
+  ]
+}
