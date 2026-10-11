@@ -40,7 +40,7 @@ Responses expose `run_id`, `status`, `progress`, `current_stage`, `result`, and 
 
 ## Public fictional-Twin chat and speech
 
-`POST /twins/{twin_id}/chat` is available for the fictional public demo Twins `alex-demo` and `maya-demo`. It requires `OPENAI_API_KEY`, returns only deterministic selected public playbook evidence, and never reads private run output. If the key is absent, it returns a clear 503 configuration error.
+`POST /twins/{twin_id}/chat` is available for the fictional public demo Twins `alex-demo` and `maya-demo`. It requires `ANTHROPIC_API_KEY`, returns only deterministic selected public playbook evidence, and never reads private run output. If the key is absent, it returns a clear 503 configuration error.
 
 `POST /twins/{twin_id}/speak` requires an `answer_id` returned by chat. It does not accept arbitrary text, preventing an unrestricted TTS proxy. It uses Fish Audio only when `FISH_AUDIO_API_KEY` and the approved synthetic `FISH_AUDIO_REFERENCE_ID` are configured. Fish Audio is optional; chat remains independent of it.
 

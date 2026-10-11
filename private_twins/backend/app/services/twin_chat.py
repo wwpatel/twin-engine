@@ -4,10 +4,7 @@ from __future__ import annotations
 
 import os
 
-import httpx
 
-
-OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 DISCLAIM = "This is an AI-generated interpretation of published historical evidence, not the real trader or financial advice."
 
 
@@ -103,26 +100,21 @@ Approved evidence:
 
 
 def request_llm_answer(twin: dict, evidence: list[dict], message: str, viewer_context: dict | None = None) -> str:
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is not configured.")
-    model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
-    payload = {
-        "model": model,
-        "temperature": 0.45,
-        "max_tokens": 180,
-        "messages": [
-            {"role": "system", "content": _system_prompt(twin, evidence, viewer_context)},
-            {"role": "user", "content": message},
-        ],
-    }
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY is not configured. Twin chat is unavailable.")
+    import anthropic
+
     try:
-        with httpx.Client(timeout=12.0) as client:
-            response = client.post(OPENAI_URL, headers={"Authorization": f"Bearer {api_key}"}, json=payload)
-            response.raise_for_status()
-            content = response.json()["choices"][0]["message"]["content"].strip()
-    except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as exc:
-        raise RuntimeError(f"OpenAI provider request failed: {exc}") from exc
+        response = anthropic.Anthropic(timeout=12.0).messages.create(
+            model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5-5"),
+            max_tokens=180,
+            temperature=0.45,
+            system=_system_prompt(twin, evidence, viewer_context),
+            messages=[{"role": "user", "content": message}],
+        )
+        content = "".join(block.text for block in response.content if getattr(block, "type", "") == "text").strip()
+    except Exception as exc:
+        raise RuntimeError(f"Anthropic provider request failed: {type(exc).__name__}") from exc
     if not content:
-        raise RuntimeError("OpenAI provider returned an empty answer.")
+        raise RuntimeError("Anthropic provider returned an empty answer.")
     return content

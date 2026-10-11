@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+**/.env
+.venv
+**/.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+**/*.sqlite3
+data/*answer_key.json
+private_twins/backend/tests
+tests

@@ -17,12 +17,19 @@ import engine
 import insights
 import activate
 import news
+from private_mount import mount_private
 
 app = FastAPI()
 
+def cors_origins() -> list[str]:
+    """ALLOWED_ORIGINS: "*" (default, demo) or a comma-separated list. The only CORS layer; /private adds none."""
+    raw = os.environ.get("ALLOWED_ORIGINS", "*")
+    return [o.strip() for o in raw.split(",") if o.strip()] or ["*"]
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -268,3 +275,6 @@ def get_news(symbol: str, date: str, fallback: str | None = None):
 @app.get("/health")
 def health():
     return {"ok": True}
+
+
+mount_private(app)
