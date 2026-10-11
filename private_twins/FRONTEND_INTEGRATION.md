@@ -95,7 +95,7 @@ Successful response:
 }
 ```
 
-Render the answer, evidence, limitations, and disclaimer together. A 503 response means `OPENAI_API_KEY` is not configured; show “Public Twin chat is temporarily unavailable.” A 502 response means the provider failed; offer retry. Do not show a mock answer in either case.
+Render the answer, evidence, limitations, and disclaimer together. A 503 response means `ANTHROPIC_API_KEY` is not configured; show “Public Twin chat is temporarily unavailable.” A 502 response means the provider failed; offer retry. Do not show a mock answer in either case.
 
 ## Fish Audio speech
 

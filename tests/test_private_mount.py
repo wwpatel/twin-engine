@@ -47,16 +47,15 @@ def test_b_twin_list_works():
 
 
 def test_b_chat_without_key_is_a_clear_503(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     response = client.post("/private/twins/alex-demo/chat", json={"message": "How long do you hold?"})
     assert response.status_code == 503
-    assert "OPENAI_API_KEY" in response.json()["detail"]
+    assert "ANTHROPIC_API_KEY" in response.json()["detail"]
 
 
 def test_b_speech_without_key_is_a_clear_error(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("FISH_AUDIO_API_KEY", raising=False)
-    # A privacy-reply answer needs no OpenAI key, so we can obtain a real answer_id offline.
+    # A privacy-reply answer needs no model key, so we can obtain a real answer_id offline.
     chat = client.post("/private/twins/alex-demo/chat", json={"message": "Can you see my uploaded CSV?"}).json()
     response = client.post("/private/twins/alex-demo/speak", json={"answer_id": chat["answer_id"]})
     assert response.status_code == 503
@@ -122,8 +121,7 @@ def _stub_anthropic(monkeypatch, text="From my published history, I held for abo
     return calls
 
 
-def test_chat_falls_back_to_anthropic(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+def test_chat_uses_anthropic(monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-not-a-real-key")
     monkeypatch.delenv("ANTHROPIC_MODEL", raising=False)
     calls = _stub_anthropic(monkeypatch)
@@ -137,30 +135,7 @@ def test_chat_falls_back_to_anthropic(monkeypatch):
     assert calls["messages"] == [{"role": "user", "content": "How long do you hold?"}]
 
 
-def test_openai_key_wins_over_anthropic(monkeypatch):
-    monkeypatch.setenv("OPENAI_API_KEY", "test-not-a-real-key")
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-not-a-real-key")
-    monkeypatch.setattr("app.services.twin_chat.httpx.Client", _fake_openai_client)
-    _stub_anthropic(monkeypatch, text="should not be used")
-    response = client.post("/private/twins/alex-demo/chat", json={"message": "How long do you hold?"})
-    assert response.json()["answer"] == "openai answer"
-
-
-def _fake_openai_client(*args, **kwargs):
-    import types
-
-    class Client:
-        def __enter__(self): return self
-        def __exit__(self, *a): return False
-        def post(self, *a, **kw):
-            return types.SimpleNamespace(
-                raise_for_status=lambda: None,
-                json=lambda: {"choices": [{"message": {"content": "openai answer"}}]})
-    return Client()
-
-
 def test_anthropic_failure_is_502_json(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test-not-a-real-key")
 
     def boom(**kw):
@@ -172,7 +147,6 @@ def test_anthropic_failure_is_502_json(monkeypatch):
 
 
 def test_no_chat_key_is_503_json_not_500(monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     response = client.post("/private/twins/alex-demo/chat", json={"message": "hi"})
     assert response.status_code == 503

@@ -24,7 +24,7 @@ A Base44 app cannot produce a Clerk JWT, which is why the header modes exist.
 
 | Variable | Default | If missing |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | none | `POST /runs` runs end in `status:"error"`; `/private` chat falls back to it when no OpenAI key |
+| `ANTHROPIC_API_KEY` | none | `POST /runs` runs end in `status:"error"`; `/private` twin chat returns 503 JSON |
 | `ANTHROPIC_MODEL` | `claude-sonnet-5-5` | |
 | `BRIGHTDATA_API_KEY`, `BRIGHTDATA_ZONE` | none | `GET /news` returns `source:"error"` (or cached items with `fallback=cache`) |
 | `DAYTONA_API_KEY`, `DAYTONA_API_URL` | none | rule execution falls back as before |
@@ -33,7 +33,6 @@ A Base44 app cannot produce a Clerk JWT, which is why the header modes exist.
 | `DEMO_AUTH` | unset (off) | `1` enables `X-Demo-User` |
 | `CLERK_JWT_ISSUER`, `CLERK_JWKS_URL` | none | only used when `AUTH_MODE=clerk` |
 | `DATABASE_PATH` | `/tmp/twin.sqlite3` | data resets on restart |
-| `OPENAI_API_KEY`, `OPENAI_MODEL` (`gpt-4.1-mini`) | none | chat uses Anthropic if its key is set, else 503 |
 | `FISH_AUDIO_API_KEY`, `FISH_AUDIO_MODEL` (`s2.1-pro`) | none | `/speak` returns 503; text chat unaffected |
 | `FISH_AUDIO_REFERENCE_ID`, `FISH_AUDIO_REFERENCE_ID_{ALEX,MAYA,JACK,LENA,DANIEL,SOFIA}_DEMO` | none | Fish Audio default voice. Use authorized synthetic voices only, never a real person's |
 | `PORT` | `8000` | read by the Docker CMD |
@@ -103,10 +102,9 @@ curl -X POST -H "$H" $BASE/private/me/creator-twin -H 'content-type: application
 
 ## Chat provider
 
-`OPENAI_API_KEY` set: OpenAI, exactly as before. Otherwise `ANTHROPIC_API_KEY` set: Anthropic SDK with
-`ANTHROPIC_MODEL`, same system prompt, inputs and output shape. Neither: 503 JSON. The system prompt already says
-"Never give investment advice" and restricts answers to the approved evidence; private-data questions get a fixed refusal.
-Every response carries a disclaimer.
+Twin chat uses the Anthropic SDK with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`. No key: 503 JSON `{"detail":"ANTHROPIC_API_KEY is not configured..."}`; provider failure: 502.
+The system prompt already says "Never give investment advice" and restricts answers to the approved evidence; private-data
+questions get a fixed refusal. Every response carries a disclaimer.
 
 ## Wording check
 

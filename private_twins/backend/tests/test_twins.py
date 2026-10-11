@@ -8,10 +8,10 @@ client = TestClient(app)
 
 
 def test_chat_requires_configured_provider(monkeypatch) -> None:
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     response = client.post("/twins/alex-demo/chat", json={"message": "What is the holding period?"})
     assert response.status_code == 503
-    assert "OPENAI_API_KEY" in response.json()["detail"]
+    assert "ANTHROPIC_API_KEY" in response.json()["detail"]
 
 
 def test_chat_returns_only_registry_evidence_and_answer_id(monkeypatch) -> None:
