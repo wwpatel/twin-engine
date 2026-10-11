@@ -245,7 +245,10 @@ def get_news(symbol: str, date: str):
     if not _allow_news_call():
         raise HTTPException(status_code=429, detail="News rate limit exceeded (10 per minute)")
 
-    items = news.get_headlines(symbol, date)
+    try:
+        items = news.fetch_live_headlines(symbol, date, use_cache=False)
+    except Exception as e:
+        return {"symbol": symbol, "date": date, "items": [], "source": "error", "message": f"News lookup failed: {type(e).__name__}: {e}"}
     return {"symbol": symbol, "date": date, "items": items, "source": "live"}
 
 

@@ -153,3 +153,31 @@ def test_get_headlines_never_raises_and_does_not_cache_failures(empty_cache, mon
 
     monkeypatch.setattr(news.requests, "post", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom")))
     assert news.get_headlines("NVDA", "2026-03-14") == []
+
+
+def test_use_cache_false_bypasses_cache_but_still_writes(empty_cache, monkeypatch):
+    news = empty_cache
+    monkeypatch.setattr(news.requests, "post", lambda *a, **k: FakeResponse(200, FIXTURE_RESPONSE))
+    assert len(news.get_headlines("NVDA", "2026-03-14")) == 3
+
+    calls = [0]
+
+    def counting_post(*a, **k):
+        calls[0] += 1
+        return FakeResponse(200, FIXTURE_RESPONSE)
+
+    monkeypatch.setattr(news.requests, "post", counting_post)
+    out = news.get_headlines("NVDA", "2026-03-14", use_cache=False)
+    assert calls[0] == 1
+    assert len(out) == 3
+
+    monkeypatch.setattr(news.requests, "post", lambda *a, **k: pytest.fail("cache should be used"))
+    assert news.get_headlines("NVDA", "2026-03-14", use_cache=True) == out
+
+
+def test_fetch_live_headlines_raises_news_unavailable_without_credentials(empty_cache, monkeypatch):
+    news = empty_cache
+    monkeypatch.delenv("BRIGHTDATA_API_KEY", raising=False)
+    with pytest.raises(news.NewsUnavailable):
+        news.fetch_live_headlines("NVDA", "2026-03-14")
+    assert news.get_headlines("NVDA", "2026-03-14") == []
