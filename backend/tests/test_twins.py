@@ -70,6 +70,7 @@ def test_each_demo_twin_has_an_approved_distinct_communication_style() -> None:
     assert maya["playbook"]["entry_approach"] in _system_prompt(maya, maya["patterns"][:1])
     assert maya["recent_demo_activity"][0]["summary"] in _system_prompt(maya, maya["patterns"][:1])
     assert "Do not assign a strategy label" in _system_prompt(maya, maya["patterns"][:1])
+    assert "review questions or risk checks" in _system_prompt(maya, maya["patterns"][:1])
 
 
 def test_speak_only_accepts_a_previous_answer_for_the_same_twin(monkeypatch) -> None:
