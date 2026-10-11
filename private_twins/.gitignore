@@ -1,0 +1,14 @@
+.env
+.venv*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+dist/
+build/
+.venv/
+__pycache__/
+*.pyc
+backend/twin.sqlite3
+backend/*.mp3
+backend/.env
